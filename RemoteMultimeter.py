@@ -1,10 +1,24 @@
 import visa
 import time
 
-def VolatageToPressure(voltage_reading, supply_voltage):
-    #Will convert voltage to pressure 
-    return 0
-    
+#Global Settings Declarations
+PRESSURE_SENSOR_SUPPLY_VOLTAGE = 8
+
+# Helper class for ease of reading returned values
+class ScanResult:
+    def volatageToPressure(self, voltage_reading, supply_voltage):
+        #Will convert voltage to pressure 
+        pressure = 0 #Some linear function of voltage reading and supply voltage
+        return pressure
+    def __init__(self, raw_result, num_temp):
+        self.raw_result = raw_result
+        self.raw_result_list = [float(i) for i in raw_result.split(',')]
+        self.temperatures = raw_result_list[:num_temp]
+        self.pressures = []
+        for voltage in raw_result_list[num_temp:]:
+            self.pressures.append(self.volatageToPressure(voltage, PRESSURE_SENSOR_SUPPLY_VOLTAGE))
+        
+
 
 
 class RemoteMultimeter:
@@ -26,8 +40,7 @@ class RemoteMultimeter:
         self.dev.write("*RST")
         self.dev.write("*CLS")
         self.dev.write("TRAC:CLE")
-        #self.dev.write("ROUT:OPEN:ALL")
-        self.dev.write("INIT:CONT OFF")
+
 
         #Setup display
         self.dev.write("DISP:TEXT:STAT ON")
@@ -47,13 +60,39 @@ class RemoteMultimeter:
             self.dev.write("VOLT:RANG 10, (@"+str(channel)+")")
         
 
-    def setupChannels(self, list_of_channels):
+    def setupChannels(self, list_of_temp_channels, list_of_volt_channels):
+        #Create the total list of channels
+        list_of_channels = list_of_temp_channels
+        list_of_channels.extend(list_of_volt_channels)
+
         list_of_channels_str = ""
         for channel in list_of_channels:
             list_of_channels_str = list_of_channels_str+str(channel)+","
         list_of_channels_str = list_of_channels_str[:-1]
-        self.dev.write("ROUT:SCAN (@"+list_of_channels_str+")")
 
+        #Save channel lists
+        self.list_of_temp_channels = list_of_temp_channels
+        self.list_of_volt_channels = list_of_volt_channels
+        self.list_of_channels = list_of_channels
+
+        #Start setup for Keithley 2700
+        self.dev.write("TRAC:CLE")
+        self.dev.write("INIT:CONT OFF")
+        self.dev.write("TRIG:COUN INF")
+
+        #List channels
+        self.setupTemperatureChannels(list_of_temp_channels)
+        self.setupVoltageChannels(list_of_volt_channels)
+        self.dev.write("SAMP:COUN "+str(len(list_of_channels)))
+        self.dev.write("ROUT:SCAN (@"+list_of_channels_str+")")
+        
+        self.dev.write("ROUT:SCAN:TSO IMM")
+        self.dev.write("ROUT:SCAN:LSEL INT")
+        
+
+    def scan(self):
+        self.last_scan_result = ScanResult((self.dev.query("READ?")),len(self.list_of_temp_channels))
+        return self.last_scan_result
 
     def identify(self):
         return self.dev.query("*IDN?")
@@ -67,9 +106,6 @@ class RemoteMultimeter:
         time.sleep(3)
         self.dev.write("DISP:TEXT:STAT OFF")		
         self.dev.write("ROUT:OPEN:ALL")	
-
-    def scan(self):
-        
 
     #The following functions act as "pass-throughs" for SCPI commands
     def write(self, string):
