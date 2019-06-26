@@ -35,7 +35,7 @@ class ScanResult:
         for val in raw_result[:num_temp*3]:
             if i % 3 == 0:
                 self.pressures.append(self.volatageToPressure(
-                    float(val), PRESSURE_SENSOR_SUPPLY_VOLTAGE))
+                    float(val[:-3]), PRESSURE_SENSOR_SUPPLY_VOLTAGE))
             i += 1
 
 
@@ -95,19 +95,20 @@ class RemoteMultimeter:
             self.dev.write("VOLT:RANG 10, (@"+str(channel)+")")
 
     def setupChannels(self, list_of_temp_channels, list_of_volt_channels):
+        # Save channel lists
+        self.list_of_temp_channels = list_of_temp_channels
+        self.list_of_volt_channels = list_of_volt_channels
+        
         # Create the total list of channels
         list_of_channels = list_of_temp_channels
         list_of_channels.extend(list_of_volt_channels)
+        self.list_of_channels = list_of_channels
 
         list_of_channels_str = ""
         for channel in list_of_channels:
             list_of_channels_str = list_of_channels_str+str(channel)+","
         list_of_channels_str = list_of_channels_str[:-1]
 
-        # Save channel lists
-        self.list_of_temp_channels = list_of_temp_channels
-        self.list_of_volt_channels = list_of_volt_channels
-        self.list_of_channels = list_of_channels
 
         # Start setup for Keithley 2700
         self.dev.write("TRAC:CLE")
@@ -115,9 +116,9 @@ class RemoteMultimeter:
         self.dev.write("TRIG:COUN 1")
 
         # List channels
-        self.setupTemperatureChannels(list_of_temp_channels)
-        self.setupVoltageChannels(list_of_volt_channels)
-        self.dev.write("SAMP:COUN "+str(len(list_of_channels)))
+        self.setupTemperatureChannels(self.list_of_temp_channels)
+        self.setupVoltageChannels(self.list_of_volt_channels)
+        self.dev.write("SAMP:COUN "+str(len(self.list_of_channels)))
         self.dev.write("ROUT:SCAN (@"+list_of_channels_str+")")
 
         self.dev.write("ROUT:SCAN:TSO IMM")
@@ -125,7 +126,7 @@ class RemoteMultimeter:
 
     def scan(self):
         self.last_scan_result = ScanResult(
-            (self.dev.query_ascii_values("READ?")), len(self.list_of_temp_channels))
+            [x.strip() for x in self.dev.query("READ?").split(',')], len(self.list_of_temp_channels))
         return self.last_scan_result
 
     def identify(self):
@@ -153,6 +154,6 @@ class RemoteMultimeter:
 
     def __str__(self) :
         if self.connected :
-            return "Connected!\n"+self.identify()
+            return "Connected to device at "+str(self.ip)+":"+str(self.port)+"\n"+self.identify()
         else:
             return "Device at "+str(self.ip)+":"+str(self.port)+" is not yet connected"
