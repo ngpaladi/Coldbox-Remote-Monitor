@@ -35,7 +35,7 @@ class ScanResult:
         i = 0
         for val in raw_result[:num_temp*3]:
             if i % 3 == 0:
-                self.pressures.append(self.volatageToPressure(
+                self.pressures.append(self.voltageToPressure(
                     float(val[:-3]), PRESSURE_SENSOR_SUPPLY_VOLTAGE))
             i += 1
 
