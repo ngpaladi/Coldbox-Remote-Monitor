@@ -7,49 +7,88 @@ REFERENCE_PRESSURE = 1.013  # bar
 MAX_PRESSURE = 59  # bar
 MIN_PRESSURE = -1  # bar
 
+# Unit Abbreviation Map
+UNIT_ABBREVATION_MAP = {"celcius": "C", "voltage": "V", "pascal": "Pa"}
+
+# Acceptable Units
+TEMPERATURE_UNITS = ["C"]
+VOLTAGE_UNITS = ["V"]
+PRESSURE_UNITS = ["Pa"]
+
+
+def RemoveUnits(string):
+    while not (string[-1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']):
+        string = string[:-1]
+    return string
+
+
+class Channel:
+    def __init__(self, id: int, unit: str):
+        self.id = int(id)
+        self.unit = str(unit)
+
+
+    def __str__(self):
+        return str(self.id)
+
+
+class Measurement:
+    def __init__(self, channel: Channel, time: float, value: float):
+        self.channel = int(channel.id)
+        self.time = float(time)
+        self.value = float(value)
+        self.unit = str(channel.unit)
+
 
 class ScanResult:
     # Helper class for ease of reading returned values
 
-    def voltageToPressure(self, voltage_reading, supply_voltage):
+    def voltageToPressure(self, voltage_reading: float) -> float:
 
         # Will convert voltage to pressure
-        pressure = (voltage_reading - 0.1*supply_voltage)*(MAX_PRESSURE-MIN_PRESSURE)/(0.8*supply_voltage) + \
+        pressure = (voltage_reading - 0.1*PRESSURE_SENSOR_SUPPLY_VOLTAGE)*(MAX_PRESSURE-MIN_PRESSURE)/(0.8*PRESSURE_SENSOR_SUPPLY_VOLTAGE) + \
             MIN_PRESSURE+REFERENCE_PRESSURE  # Some linear function of voltage reading and supply voltage
         return pressure
 
-    def __init__(self, raw_result, timestamp, num_temp, num_pres=0):
-        self.raw_result = raw_result
-        self.timestamp = timestamp
+    def __init__(self, channels: list, raw_result: list, timestamp: float):
+        self.raw_result = list(raw_result)
+        self.channels = list(channels)
+        self.initial_timestamp = float(timestamp)
+        self.readings = {}
 
-        # Grab Temperatures
-        self.temperatures = []
-        i = 0
-        for val in raw_result[:num_temp*3]:
-            if i % 3 == 0:
-                self.temperatures.append(float(val))
-            i += 1
+        entry_index = 0
+        channel_index = 0
+        last_value = 0.
+        last_time = 0.
+        for entry in raw_result:
+            if entry_index % 3 == 0:
+                last_value = float(RemoveUnits(entry))
+            if entry_index % 3 == 1:
+                last_time = float(RemoveUnits(entry))
+                if(channels[channel_index].unit in ["Pa"]):
+                    self.readings[channels[channel_index].id] = Measurement(
+                        channels[channel_index], self.initial_timestamp+last_time, self.voltageToPressure(last_value))
+                else:
+                    self.readings[channels[channel_index].id] = Measurement(
+                        channels[channel_index], self.initial_timestamp+last_time, last_value)
+                channel_index += 1
+            entry_index += 1
 
-        # Grab Pressures
-        self.pressures = []
-        i = 0
-        for val in raw_result[:num_temp*3]:
-            if i % 3 == 0:
-                self.pressures.append(self.voltageToPressure(
-                    float(val[:-3]), PRESSURE_SENSOR_SUPPLY_VOLTAGE))
-            i += 1
+    def makeCsvRow(self) -> str:
+        string = ""
+        for channel in self.channels:
+            string = string + \
+                str(self.readings[channel.id].time)+"," + \
+                str(self.readings[channel.id].value)+","
+        return string[:-1]
 
-        # Grab Average Times
-        self.timestamps = []
-        i = 0
-        for val in raw_result[:num_temp*3]:
-            if i % 3 == 1:
-                self.timestamps.append(float(val[:-4]))
-            i += 1
-        self.average_time = sum(self.timestamps)/len(self.timestamps)
-
-    def getCsvRow(self, start_time):
-        return str(self.average_time+self.timestamp-start_time)+","+','.join(map(str, self.temperatures+self.pressures))
+    def makeCsvHeader(self) -> str:
+        string = ""
+        for channel in self.channels:
+            string = string + "Channel " + \
+                str(channel.id)+" Time (s),Channel " + \
+                str(channel.id)+"Value ("+str(channel.unit)+"),"
+        return string[:-1]
 
     def __str__(self):
         return str(self.raw_result)
@@ -58,105 +97,150 @@ class ScanResult:
 class RemoteMultimeter:
     # Class for interacting with the multimeter
 
-    def __init__(self, ip, port):
+    def __init__(self, ip: str, port: int):
         # Set IP and Port
-        self.ip = ip
-        self.port = port
+        self.ip = str(ip)
+        self.port = int(port)
         self.connected = False
 
     def connect(self):
         # Start visa resource manager
-        self.rm = visa.ResourceManager("@py")
+        self.resource_manager = visa.ResourceManager("@py")
 
         # Open a socket connection to the Keithley 2701 device and configure read/write termination
-        self.dev = self.rm.open_resource(
+        self.device = self.resource_manager.open_resource(
             'TCPIP::'+str(self.ip)+'::'+str(self.port)+'::SOCKET')
-        self.dev.read_termination = '\n'
-        self.dev.write_termination = '\n'
+        self.device.read_termination = '\n'
+        self.device.write_termination = '\n'
 
         # Reset and clear device
-        self.dev.write("*RST")
-        self.dev.write("*CLS")
-        self.dev.write("TRAC:CLE")
+        self.device.write("*RST")
+        self.device.write("*CLS")
+        self.device.write("TRAC:CLE")
 
         # Setup display
-        self.dev.write("DISP:TEXT:STAT ON")
-        self.dev.write("DISP:TEXT:DATA 'READY'")
+        self.device.write("DISP:TEXT:STAT ON")
+        self.device.write("DISP:TEXT:DATA 'READY'")
 
         self.connected = True
 
-    def setupTemperatureChannels(self, list_of_channels):
+    def setupTemperatureChannels(self):
         # Sets each channel in the list for a thermistor
-        self.dev.write("UNIT:TEMP C")
-        for channel in list_of_channels:
-            self.dev.write("FUNC 'TEMP',(@"+str(channel)+")")
+        self.device.write("UNIT:TEMP C")
+        for channel in self.temperature_channels:
+            self.device.write("FUNC 'TEMP',(@"+str(channel)+")")
+            self.device.write("TEMP:TRAN TC")
+            self.device.write("TEMP:TC:TYPE K")
 
-    def setupVoltageChannels(self, list_of_channels):
+    def setupVoltageChannels(self):
         # Sets each channel in the list
-        for channel in list_of_channels:
-            self.dev.write("FUNC 'VOLT',(@"+str(channel)+")")
-            self.dev.write("VOLT:RANG 10, (@"+str(channel)+")")
+        for channel in list(self.voltage_channels+self.pressure_channels):
+            self.device.write("FUNC 'VOLT',(@"+str(channel)+")")
+            self.device.write("VOLT:RANG 10, (@"+str(channel)+")")
 
-    def setupChannels(self, list_of_temp_channels, list_of_volt_channels):
+    def setVoltageChannels(self, channels: list, unit: str):
+        if (unit.lower() in UNIT_ABBREVATION_MAP):
+            unit = UNIT_ABBREVATION_MAP[unit]
+        if (unit not in ["V"]):
+            raise Exception("ERROR! Invalid units")
+
+        self.voltage_channels = []
+        for id in channels:
+            self.voltage_channels.append(Channel(id, unit))
+
+    def setTemperatureChannels(self, channels: list, unit: str):
+        if (unit.lower() in UNIT_ABBREVATION_MAP):
+            unit = UNIT_ABBREVATION_MAP[unit]
+        if (unit not in ["C"]):
+            raise Exception("ERROR! Invalid units")
+
+        self.temperature_channels = []
+        for id in channels:
+            self.temperature_channels.append(Channel(id, unit))
+
+    def setPressureChannels(self, channels: list, unit: str):
+        if (unit.lower() in UNIT_ABBREVATION_MAP):
+            unit = UNIT_ABBREVATION_MAP[unit]
+        if (unit not in ["Pa"]):
+            raise Exception("ERROR! Invalid units")
+
+        self.pressure_channels = []
+        for id in channels:
+            self.pressure_channels.append(Channel(id, unit))
+
+    def setupChannels(self):
+        if (self.temperature_channels == [] and self.voltage_channels == [] and self.pressure_channels == []):
+            raise Exception("ERROR! No channels to set up")
         # Save channel lists
-        self.list_of_temp_channels = list_of_temp_channels
-        self.list_of_volt_channels = list_of_volt_channels
 
         # Create the total list of channels
-        list_of_channels = list_of_temp_channels + list_of_volt_channels
-        self.list_of_channels = list_of_channels
+        channels = list(self.temperature_channels +
+                        self.voltage_channels + self.pressure_channels)
+        self.channels = channels
 
         list_of_channels_str = ""
-        for channel in list_of_channels:
+
+        for channel in channels:
             list_of_channels_str = list_of_channels_str+str(channel)+","
+
         list_of_channels_str = list_of_channels_str[:-1]
         self.list_of_channels_str = list_of_channels_str
 
         # Start setup for Keithley 2700
-        self.dev.write("TRAC:CLE")
-        self.dev.write("INIT:CONT OFF")
-        self.dev.write("TRIG:COUN 1")
+        self.device.write("TRAC:CLE")
+        self.device.write("INIT:CONT OFF")
+        self.device.write("TRIG:COUN 1")
 
         # List channels
-        self.setupTemperatureChannels(self.list_of_temp_channels)
-        self.setupVoltageChannels(self.list_of_volt_channels)
-        self.dev.write("SAMP:COUN "+str(len(self.list_of_channels)))
-        self.dev.write("ROUT:SCAN (@"+self.list_of_channels_str+")")
+        self.setupTemperatureChannels()
+        self.setupVoltageChannels()
+        self.device.write("SAMP:COUN "+str(len(self.channels)))
+        self.device.write("ROUT:SCAN (@"+self.list_of_channels_str+")")
 
-        self.dev.write("ROUT:SCAN:TSO IMM")
-        self.dev.write("ROUT:SCAN:LSEL INT")
+        self.device.write("ROUT:SCAN:TSO IMM")
+        self.device.write("ROUT:SCAN:LSEL INT")
 
-    def scan(self):
-        timestamp = time.time_ns() / (10 ** 9)
-        self.last_scan_result = ScanResult(
-            [x.strip() for x in self.dev.query("READ?").split(',')], timestamp, len(self.list_of_temp_channels))
+    def scan(self,timestamp):
+        self.last_scan_result = ScanResult(self.channels,
+            [x.strip() for x in self.device.query("READ?").split(',')], timestamp)
         return self.last_scan_result
 
     def identify(self):
-        return self.dev.query("*IDN?")
+        return self.device.query("*IDN?")
 
-    def display(self, string):
-        self.dev.write("DISP:TEXT:DATA '"+string+"'")
+    def display(self, string: str):
+        self.device.write("DISP:TEXT:DATA '"+string+"'")
 
     def disconnect(self):
         # close the socket connection
-        self.dev.write("DISP:TEXT:DATA 'CLOSING'")
+        self.device.write("DISP:TEXT:DATA 'CLOSING'")
         time.sleep(3)
-        self.dev.write("DISP:TEXT:STAT OFF")
-        self.dev.write("ROUT:OPEN:ALL")
+        self.device.write("DISP:TEXT:STAT OFF")
+        self.device.write("ROUT:OPEN:ALL")
 
     # The following functions act as "pass-throughs" for SCPI commands
-    def write(self, string):
-        return self.dev.write(string)
+    def write(self, string: str) -> str:
+        return self.device.write(string)
 
-    def query(self, string):
-        return self.dev.query(string)
+    def query(self, string: str) -> str:
+        return self.device.query(string)
 
-    def read(self, string):
-        return self.dev.read(string)
+    def read(self, string: str) -> str:
+        return self.device.read(string)
 
     def __str__(self):
         if self.connected:
             return "Connected to device at "+str(self.ip)+":"+str(self.port)+"\n"+self.identify()
         else:
             return "Device at "+str(self.ip)+":"+str(self.port)+" is not yet connected"
+
+    def makeCsvHeader(self) -> str:
+        if(self.channels == []):
+            raise Exception("ERROR! Channels not yet set up")
+        string = ""
+        for channel in self.channels:
+            string = string + "Channel " + \
+                str(channel.id)+" Time (s),Channel " + \
+                str(channel.id)+"Value ("+str(channel.unit)+"),"
+        return string[:-1]
+

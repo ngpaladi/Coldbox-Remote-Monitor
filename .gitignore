@@ -104,3 +104,8 @@ venv.bak/
 .mypy_cache/
 
 .vscode
+
+
+#PNG
+*.png
+*.dot
