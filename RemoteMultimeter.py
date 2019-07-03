@@ -27,7 +27,6 @@ class Channel:
         self.id = int(id)
         self.unit = str(unit)
 
-
     def __str__(self):
         return str(self.id)
 
@@ -87,7 +86,7 @@ class ScanResult:
         for channel in self.channels:
             string = string + "Channel " + \
                 str(channel.id)+" Time (s),Channel " + \
-                str(channel.id)+"Value ("+str(channel.unit)+"),"
+                str(channel.id)+" Value ("+str(channel.unit)+"),"
         return string[:-1]
 
     def __str__(self):
@@ -102,6 +101,10 @@ class RemoteMultimeter:
         self.ip = str(ip)
         self.port = int(port)
         self.connected = False
+        self.channels = []
+        self.voltage_channels = []
+        self.pressure_channels = []
+        self.temperature_channels = []
 
     def connect(self):
         # Start visa resource manager
@@ -200,9 +203,9 @@ class RemoteMultimeter:
         self.device.write("ROUT:SCAN:TSO IMM")
         self.device.write("ROUT:SCAN:LSEL INT")
 
-    def scan(self,timestamp):
+    def scan(self, timestamp):
         self.last_scan_result = ScanResult(self.channels,
-            [x.strip() for x in self.device.query("READ?").split(',')], timestamp)
+                                           [x.strip() for x in self.device.query("READ?").split(',')], timestamp)
         return self.last_scan_result
 
     def identify(self):
@@ -241,6 +244,5 @@ class RemoteMultimeter:
         for channel in self.channels:
             string = string + "Channel " + \
                 str(channel.id)+" Time (s),Channel " + \
-                str(channel.id)+"Value ("+str(channel.unit)+"),"
+                str(channel.id)+" Value ("+str(channel.unit)+"),"
         return string[:-1]
-
