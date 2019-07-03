@@ -3,6 +3,7 @@ import time
 import os
 import sys
 import json
+import subprocess
 
 def now():
     return time.time_ns()  / (10 ** 9)
@@ -25,9 +26,9 @@ print(baseline)
 
 
 start_time = now() +5
-dmm.display("WAITING FOR START")
-os.system("python -m http.server 8080")
-while now() != start_time:
+dmm.display("WAITING")
+p1 = subprocess.Popen("python -m http.server 8080")
+while now() < start_time:
     time.sleep(0.1)
 
 for i in range(10):
@@ -38,4 +39,6 @@ for i in range(10):
 
 dmm.display("DONE")
 time.sleep(3)
+p1.terminate()
+p1.wait()
 dmm.disconnect()
