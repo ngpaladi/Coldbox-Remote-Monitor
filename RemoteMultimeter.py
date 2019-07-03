@@ -8,18 +8,26 @@ MAX_PRESSURE = 59  # bar
 MIN_PRESSURE = -1  # bar
 
 # Unit Abbreviation Map
-UNIT_ABBREVATION_MAP = {"celcius": "C", "voltage": "V", "pascal": "Pa"}
+UNIT_ABBREVATION_MAP = {"celcius": "C", "voltage": "V", "bar": "bar"}
 
 # Acceptable Units
 TEMPERATURE_UNITS = ["C"]
 VOLTAGE_UNITS = ["V"]
-PRESSURE_UNITS = ["Pa"]
+PRESSURE_UNITS = ["bar"]
 
 
-def RemoveUnits(string):
+def RemoveUnits(string: str) -> str:
     while not (string[-1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']):
         string = string[:-1]
     return string
+
+
+def VoltageToPressure(voltage_reading: float) -> float:
+
+        # Will convert voltage to pressure
+    pressure = (voltage_reading - 0.1*PRESSURE_SENSOR_SUPPLY_VOLTAGE)*(MAX_PRESSURE-MIN_PRESSURE)/(0.8*PRESSURE_SENSOR_SUPPLY_VOLTAGE) + \
+        MIN_PRESSURE+REFERENCE_PRESSURE  # Some linear function of voltage reading and supply voltage
+    return pressure
 
 
 class Channel:
@@ -42,13 +50,6 @@ class Measurement:
 class ScanResult:
     # Helper class for ease of reading returned values
 
-    def voltageToPressure(self, voltage_reading: float) -> float:
-
-        # Will convert voltage to pressure
-        pressure = (voltage_reading - 0.1*PRESSURE_SENSOR_SUPPLY_VOLTAGE)*(MAX_PRESSURE-MIN_PRESSURE)/(0.8*PRESSURE_SENSOR_SUPPLY_VOLTAGE) + \
-            MIN_PRESSURE+REFERENCE_PRESSURE  # Some linear function of voltage reading and supply voltage
-        return pressure
-
     def __init__(self, channels: list, raw_result: list, timestamp: float):
         self.raw_result = list(raw_result)
         self.channels = list(channels)
@@ -64,9 +65,9 @@ class ScanResult:
                 last_value = float(RemoveUnits(entry))
             if entry_index % 3 == 1:
                 last_time = float(RemoveUnits(entry))
-                if(channels[channel_index].unit in ["Pa"]):
+                if(channels[channel_index].unit in PRESSURE_UNITS):
                     self.readings[channels[channel_index].id] = Measurement(
-                        channels[channel_index], self.initial_timestamp+last_time, self.voltageToPressure(last_value))
+                        channels[channel_index], self.initial_timestamp+last_time, VoltageToPressure(last_value))
                 else:
                     self.readings[channels[channel_index].id] = Measurement(
                         channels[channel_index], self.initial_timestamp+last_time, last_value)

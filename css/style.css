@@ -1,0 +1,113 @@
+body {
+    background-color: lightgrey;
+}
+
+.navbar-custom {
+    background-color: #32528d;
+    border-color: #E7E7E7;
+    box-shadow: 0 2px 2px -2px rgba(0, 0, 0, .2);
+    
+    height: 5vh;
+}
+
+.splash {
+    background-color: lightgrey;
+    padding-top: 2vh;
+    padding-bottom: 7vh;
+    padding-left: 10vh;
+    padding-right: 10vh;
+    align-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: middle;
+    height: 90vh;
+}
+
+.splash h1 {
+    color: white;
+    font-weight: bold;
+    font-size: calc(50px + 5vmin);
+}
+
+.splash h2 {
+    color: lightgray;
+    font-weight: normal;
+}
+
+#splash-logo {
+    margin: 15vh;
+    height: 400px;
+}
+
+.section {
+    text-align: center;
+    align-content: center;
+    align-items: center;
+    padding: 5vh;
+}
+
+.section p {
+    text-align: left;
+}
+
+.section h1 {
+    padding-bottom: 5vh;
+}
+
+.section h2 {
+    padding-bottom: 10px;
+}
+.section h3 {
+    padding-bottom: 10px;
+}
+
+.section-dark {
+    background-color: #404040;
+    color: lightgrey;
+}
+
+.section-light {
+    background-color: lightgrey;
+    color: #404040;
+}
+
+.section-box {
+    background-color: rgba(0, 0, 0, .1);
+    color: #404040;
+}
+
+.section-box .container {
+    background-color: lightgrey;
+    padding: 5vh;
+    color: #404040;
+    border-radius: 10px;
+}
+.floating-box{
+    background-color:rgb(240, 240, 240);
+    border-radius: 10px;
+}
+
+footer {
+    background-color: black;
+    color: lightgrey;
+    padding-top: 1.5vh;
+    padding-bottom: 1vh;
+    text-align: center;
+    align-content: center;
+    align-items: center;
+    height: 5vh;
+}
+.footer-link {
+    color: #acacac;
+    font-size: 16px;
+    text-decoration: underline;
+}
+.footer-link:hover {
+    color: #d1d1d1;
+
+}
+footer h6 {
+    font-size: 16px;
+    color: #acacac;
+    padding-bottom: 0vh;
+}

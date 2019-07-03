@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Coldbox Remote Monitor</title>
+  <meta charset="utf-8">
+  <link rel="shortcut icon" href="favicon.ico" type="image/icon">
+  <link rel="icon" href="favicon.ico" type="image/icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- CDN Imports (CSS & JS) -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"
+    integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
+    crossorigin="anonymous"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+
+  <!-- Custom JS -->
+  <script src="js/main.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow ">
+    <div class="container">
+      <a class="navbar-brand" href="#"> Coldbox Remote Monitor</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
+        aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+
+      <div class="collapse navbar-collapse" id="navbarToggler">
+        <ul class="navbar-nav ml-auto float-center text-center">
+            <li class="nav-item">
+                <p id="refresh-counter" class="nav-link " style="color: white; padding-top: 2.5vh; "href="#">SECONDS SINCE LAST REFRESH</a>
+              </li>
+          <li class="nav-item" style="padding-top: 1.5vh; padding-left: 5vh;">
+            <a class="nav-link btn btn-success" style="color: white;" href="index.html">REFRESH</a>
+          </li>
+          
+        </ul>
+      </div>
+  </nav>
+
+  <div class="container-fluid splash">
+      <div class="row justify-content-around" style="min-height: 40vh;">
+        <div class="col-md-4 floating-box" style="min-height: 40vh;"></div>
+        <div class="col-md-3 floating-box" style="min-height: 40vh;"></div>
+        <div class="col-md-4 floating-box" style="min-height: 40vh;"></div>
+      
+      </div>
+      <div class="row justify-content-around" style="height: 6vh;"></div>
+      <div class="row justify-content-around" style="min-height: 40vh;">
+        <div class="col-md-9 floating-box" style="min-height: 40vh;"></div>
+      </div>
+  </div>
+
+
+  <footer class="container-fluid fixed-bottom shadow">
+    <p>&copy; 2019 Noah Paladino - Purdue University. All rights reserved.</p>
+  </footer>
+  <script type="text/javascript">
+
+
+  </script>
+</body>
+
+</html>

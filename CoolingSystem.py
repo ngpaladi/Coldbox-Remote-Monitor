@@ -27,9 +27,10 @@ class ChannelPair:
 
 
 class CoolingSystemSetup:
-    def __init__(self, channel_list, channel_pair_list):
+    def __init__(self, channel_list, channel_pair_list, start_time):
         self.channels = channel_list
         self.channel_pair_list = channel_pair_list
+        self.start_time = start_time
 
 
 class CoolingSystemState:

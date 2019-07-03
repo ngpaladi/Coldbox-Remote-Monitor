@@ -11,7 +11,7 @@ def now():
 dmm = RM.RemoteMultimeter("192.168.69.102", 1394)
 dmm.connect()
 dmm.setTemperatureChannels([125], "C")
-dmm.setPressureChannels([126], "Pa")
+dmm.setPressureChannels([126], "bar")
 dmm.setupChannels()
 print(dmm)
 print(dmm.makeCsvHeader())
@@ -27,7 +27,7 @@ print(baseline)
 
 start_time = now() +5
 dmm.display("WAITING")
-p1 = subprocess.Popen("python -m http.server 8080")
+p1 = subprocess.Popen("python -m http.server 8081")
 while now() < start_time:
     time.sleep(0.1)
 
