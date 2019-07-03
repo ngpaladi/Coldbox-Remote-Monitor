@@ -26,6 +26,7 @@ print(baseline)
 
 start_time = now() +5
 dmm.display("WAITING FOR START")
+os.system("python -m http.server 8080")
 while now() != start_time:
     time.sleep(0.1)
 
