@@ -26,7 +26,6 @@ print(baseline)
 
 start_time = now() +5
 dmm.display("WAITING FOR START")
-os.system("python -m SimpleHTTPServer")
 while now() != start_time:
     time.sleep(0.1)
 
