@@ -122,10 +122,10 @@
         refresh_counter = 0;
         table_data_str = "";
         table_header_str="";
-        //var setup = JSON.parse($.getJSON({ 'url': "./CoolingSystemSetup.json", 'async': false }).responseText);
+        var setup = JSON.parse($.getJSON({ 'url': "./CoolingSystemSetup.json", 'async': false }).responseText);
 
 
-        start_time = Date.now() / 1000 + 4;
+        start_time = setup["start_time"];
         Chart.defaults.line.backgroundColor = 'rgba(0, 0, 0, 0.0)';
         var temp_graph = new Chart(document.getElementById('temperature-graph'), {
             type: 'line',
@@ -158,43 +158,20 @@
             document.getElementById("refresh-timer").innerHTML = refresh_timer.toFixed(1);
             refresh_counter++;
         }
-        function DatasetAppender(existing, addition) {
-            for (i = 0; i < addition.length(); i++) {
-                existing[i].data.append(addition[i].data[0]);
-            }
-            return exisiting;
-        }
+
 
         function LoadState() {
             var state = JSON.parse($.getJSON({ 'url': "./CoolingSystemState.json", 'async': false }).responseText);
             if (state_number == 0) {
-                //temp_graph.data.datasets = state.temperature_dataset;
+                temp_graph.data.datasets = state["temperatures"];
             }
             else {
-                //temp_graph.data.datasets = DatasetAppender(temp_graph.data.datasets, state.temperature_dataset);
+                temp_graph.data.datasets = DatasetAppender(temp_graph.data.datasets, state["temperatures"]);
             }
             temp_graph.update();
-
-
-
-            console.log("Loaded\n");
+            console.log("Loaded State "+String(state_number)+"\n");
         }
-        function ToTableRow(list){
-            html_string = "<tr>"
-            for (i = 0; i < list.length(); i++) {
-                html_string += "<td>"+String(list[i])+"</td>"
-            }
-            html_string+="</tr>"
-            return html_string
-        }
-        function ToTableHeader(list){
-            html_string = "<tr>"
-            for (i = 0; i < list.length(); i++) {
-                html_string += "<th>"+String(list[i])+"</th>"
-            }
-            html_string+="</tr>"
-            return html_string
-        }
+
         document.getElementById("table-header").innerHTML = ToTableHeader(setup["header"]);
         setTimeout(function () { setInterval(UpdateRefreshCounter, INTERVAL * 1000); }, (start_time * 1000 - Date.now())+500);
 

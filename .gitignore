@@ -103,9 +103,14 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+
+# VS Code
 .vscode
 
-
-#PNG
+# UML Diagrams
 *.png
 *.dot
+
+# Data Files
+*.json
+*.csv

@@ -14,10 +14,9 @@ COLOR_LIST = ['red','blue','hotpink','orange','yellow','darkgreen','cyan','navy'
 
 
 def CO2State(temp:float, pres:float) -> str:
-    # From https://webbook.nist.gov/cgi/cbook.cgi?ID=C124389&Mask=4&Type=ANTOINE&Plot=on
     temp_kelvin = temp + 273.15
     pres_pa = 100000 * pres
-    print(CP.PropsSI('Phase', 'P', pres_pa, 'T',temp_kelvin,'CarbonDioxide'))
+    return CP.PhaseSI( 'P', pres_pa, 'T',temp_kelvin,'CarbonDioxide')
 
 
 
