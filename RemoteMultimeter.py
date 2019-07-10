@@ -80,7 +80,7 @@ class ScanResult:
             string = string + \
                 str(self.readings[channel.id].time)+"," + \
                 str(self.readings[channel.id].value)+","
-        return string[:-1]
+        return string[:-1]+"\n"
 
     def makeCsvHeader(self) -> str:
         string = ""
@@ -88,7 +88,7 @@ class ScanResult:
             string = string + "Channel " + \
                 str(channel.id)+" Time (s),Channel " + \
                 str(channel.id)+" Value ("+str(channel.unit)+"),"
-        return string[:-1]
+        return string[:-1]+"\n"
 
     def __str__(self):
         return str(self.raw_result)
@@ -162,10 +162,11 @@ class RemoteMultimeter:
         for id in channels:
             self.temperature_channels.append(Channel(id, unit))
 
+
     def setPressureChannels(self, channels: list, unit: str):
         if (unit.lower() in UNIT_ABBREVATION_MAP):
             unit = UNIT_ABBREVATION_MAP[unit]
-        if (unit not in ["Pa"]):
+        if (unit not in ["bar"]):
             raise Exception("ERROR! Invalid units")
 
         self.pressure_channels = []
@@ -246,4 +247,4 @@ class RemoteMultimeter:
             string = string + "Channel " + \
                 str(channel.id)+" Time (s),Channel " + \
                 str(channel.id)+" Value ("+str(channel.unit)+"),"
-        return string[:-1]
+        return string[:-1]+"\n"

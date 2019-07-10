@@ -2,6 +2,7 @@ import RemoteMultimeter as RM
 import time
 import math
 import CoolProp.CoolProp as CP
+import json
 
 PHASE_TOLERANCE = 0.01  # * 100%
 
@@ -9,6 +10,7 @@ CO2_TRIPLE_POINT_TEMP = -56.57 + 273.15  # k
 CO2_TRIPLE_POINT_PRESSURE = 5.11 * 1.01325  # bar
 CO2_CRITICAL_POINT_TEMPERATURE = 30.98 + 273.15  # k
 CO2_CRITICAL_POINT_PRESSURE = 72.79 * 1.01325 # bar
+COLOR_LIST = ['red','blue','hotpink','orange','yellow','darkgreen','cyan','navy','brown','gray','black','limegreen','navajowhite','steelblue','darkkhaki','lavender','magenta','purple','teal','greenyellow']
 
 
 def CO2State(temp:float, pres:float) -> str:
@@ -26,20 +28,68 @@ class ChannelPair:
         self.pressure_channel_id = int(pressure_channel_id)
 
 
+class CoolingSystemConfig:
+    def __init__(self, ip_address: str, port: int, temperature_channels = [], temperature_units = "", pressure_channels = [], pressure_units = "", channel_pairs=[]):
+        self.ip_address = str(ip_address)
+        self.port = int(port)
+        self.temperature_channels = list(temperature_channels)
+        self.temperature_units = str(temperature_units)
+        self.pressure_channels = list(pressure_channels)
+        self.pressure_units = str(pressure_units)
+        self.channel_pairs = list(channel_pairs)
+
 class CoolingSystemSetup:
     def __init__(self, channel_list, channel_pair_list, start_time):
         self.channels = channel_list
         self.channel_pair_list = channel_pair_list
         self.start_time = start_time
+    def WriteJSON(self):
+        writable_dict = {}
+        writable_dict["start_time"] = self.start_time
+        writable_dict["header"] = []
+        writable_dict["checkpoint_names"] = []
+
+        for pair in self.channel_pair_list:
+            writable_dict["checkpoint_names"].append(str(pair.name))
+        for channel in self.channels:
+            writable_dict["header"].append("CH " + str(channel.id)+" Time (s)")
+            writable_dict["header"].append("CH " + str(channel.id)+" Val ("+str(channel.unit)+")")
+        
+        with open("CoolingSystemSetup.json","w+") as f:
+            f.write(json.dumps(writable_dict))
+
+
 
 
 class CoolingSystemState:
     def __init__(self, setup: CoolingSystemSetup, scan_result: RM.ScanResult):
-        self.scan_result = scan_result
-        self.co2_checkpoints = {}
+        self.temperature_dataset = []
+        i=0
+        for measurement in scan_result.readings:
+            for pair in setup.channel_pair_list:
+                if (measurement.channel != pair.temperature_channel_id and measurement.channel != pair.pressure_channel_id and measurement.unit in ['C','k','F']):
+                    self.temperature_dataset.append({"label":"CH"+str(measurement.channel),"borderColor":COLOR_LIST[i % len(COLOR_LIST)], "data":[{"x":measurement.time,"y":measurement.value}]})
+                    i += 1
+
+        self.co2_checkpoints = []
         for pair in setup.channel_pair_list:
             temp = scan_result.readings[pair.temperature_channel_id].value
             pres = scan_result.readings[pair.pressure_channel_id].value
-            #state = CO2State(temp, pres)
-            self.co2_checkpoints[pair.name] = [str(temp) + " " + str(scan_result.readings[pair.temperature_channel_id].unit), str(
-                pres) + " " + str(scan_result.readings[pair.pressure_channel_id].unit), state]
+            state = CO2State(temp, pres)
+            self.co2_checkpoints.append({"name": str(pair.name), "temperature": str(temp) + " " + str(scan_result.readings[pair.temperature_channel_id].unit),"pressure": str(pres) + " " + str(scan_result.readings[pair.pressure_channel_id].unit), "state":state})
+        
+        self.table_row = []
+        for channel in scan_result.channels:
+            self.table_row.append(str(scan_result.readings[channel.id].time))
+            self.table_row.append(str(scan_result.readings[channel.id].value))
+    
+    def WriteJSON(self,state_id):
+        writable_dict = {}
+        writable_dict["id"] = state_id
+        writable_dict["temperatures"] = self.temperature_dataset
+        writable_dict["checkpoints"] = self.co2_checkpoints
+        writable_dict["row"] = self.table_row
+        with open("CoolingSystemState.json","w+") as f:
+            f.write(json.dumps(writable_dict))
+
+    

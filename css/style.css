@@ -6,16 +6,15 @@ body {
     background-color: #32528d;
     border-color: #E7E7E7;
     box-shadow: 0 2px 2px -2px rgba(0, 0, 0, .2);
-    
     height: 5vh;
 }
 
 .splash {
     background-color: lightgrey;
-    padding-top: 2vh;
-    padding-bottom: 7vh;
-    padding-left: 10vh;
-    padding-right: 10vh;
+    padding-top: 1vh;
+    padding-bottom: 5vh;
+    padding-left: 1vw;
+    padding-right: 1vw;
     align-content: center;
     align-items: center;
     text-align: center;
@@ -24,90 +23,60 @@ body {
 }
 
 .splash h1 {
-    color: white;
+    color: #404040;
     font-weight: bold;
     font-size: calc(50px + 5vmin);
 }
 
 .splash h2 {
-    color: lightgray;
+    padding: 2vh;
+    font-size: 28px;
+    color: #585858;
     font-weight: normal;
 }
 
-#splash-logo {
-    margin: 15vh;
-    height: 400px;
-}
-
-.section {
-    text-align: center;
+.floating-box {
+    background-color: rgb(240, 240, 240);
+    border-radius: 10px;
+    max-height: calc(100% - 4vh);
+    margin-right: 0.25vw;
+    margin-left: 0.25vw;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
     align-content: center;
     align-items: center;
-    padding: 5vh;
-}
-
-.section p {
-    text-align: left;
-}
-
-.section h1 {
-    padding-bottom: 5vh;
-}
-
-.section h2 {
-    padding-bottom: 10px;
-}
-.section h3 {
-    padding-bottom: 10px;
-}
-
-.section-dark {
-    background-color: #404040;
-    color: lightgrey;
-}
-
-.section-light {
-    background-color: lightgrey;
-    color: #404040;
-}
-
-.section-box {
-    background-color: rgba(0, 0, 0, .1);
-    color: #404040;
-}
-
-.section-box .container {
-    background-color: lightgrey;
-    padding: 5vh;
-    color: #404040;
-    border-radius: 10px;
-}
-.floating-box{
-    background-color:rgb(240, 240, 240);
-    border-radius: 10px;
 }
 
 footer {
     background-color: black;
     color: lightgrey;
-    padding-top: 1.5vh;
-    padding-bottom: 1vh;
+    padding-top: 0.75vh;
+    padding-bottom: 0.25vh;
     text-align: center;
     align-content: center;
     align-items: center;
-    height: 5vh;
+    height: 3.5vh;
 }
+
 .footer-link {
     color: #acacac;
     font-size: 16px;
     text-decoration: underline;
 }
+
 .footer-link:hover {
     color: #d1d1d1;
-
 }
+
 footer h6 {
     font-size: 16px;
     color: #acacac;
     padding-bottom: 0vh;
+}
+
+.graph-in-box {
+    align-self: center;
+    margin-left: 5%;
+    margin-right: 5%;
+    max-width: 80%;
 }
