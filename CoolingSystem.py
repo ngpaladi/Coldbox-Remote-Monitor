@@ -37,10 +37,16 @@ class CoolingSystemConfig:
         self.pressure_units = str(pressure_units)
         self.channel_pairs = list(channel_pairs)
 
+        self.channels = []
+        for ch in self.temperature_channels :
+            self.channels.append(RM.Channel(ch,self.temperature_units))
+        for ch in self.pressure_channels :
+            self.channels.append(RM.Channel(ch,self.pressure_units))
+
 class CoolingSystemSetup:
-    def __init__(self, channel_list, channel_pair_list, start_time):
-        self.channels = channel_list
-        self.channel_pair_list = channel_pair_list
+    def __init__(self, config, start_time):
+        self.channels = config.channels
+        self.channel_pair_list = config.channel_pairs
         self.start_time = start_time
     def WriteJSON(self):
         writable_dict = {}
@@ -63,19 +69,24 @@ class CoolingSystemSetup:
 class CoolingSystemState:
     def __init__(self, setup: CoolingSystemSetup, scan_result: RM.ScanResult):
         self.temperature_dataset = []
+
+
         i=0
-        for measurement in scan_result.readings:
+        for ch in scan_result.readings:
+            paired_ch = False
             for pair in setup.channel_pair_list:
-                if (measurement.channel != pair.temperature_channel_id and measurement.channel != pair.pressure_channel_id and measurement.unit in ['C','k','F']):
-                    self.temperature_dataset.append({"label":"CH"+str(measurement.channel),"borderColor":COLOR_LIST[i % len(COLOR_LIST)], "data":[{"x":measurement.time,"y":measurement.value}]})
-                    i += 1
+                if (ch == pair.temperature_channel_id or ch == pair.pressure_channel_id or (not scan_result.readings[ch].unit in ['C','k','F'])):
+                    paired_ch = True
+            if not paired_ch:
+                self.temperature_dataset.append({"label":"CH"+str(ch),"borderColor":COLOR_LIST[i % len(COLOR_LIST)], "data":[{"x":scan_result.readings[ch].time,"y":scan_result.readings[ch].value}]})
+                i += 1  
 
         self.co2_checkpoints = []
         for pair in setup.channel_pair_list:
             temp = scan_result.readings[pair.temperature_channel_id].value
             pres = scan_result.readings[pair.pressure_channel_id].value
             state = CO2State(temp, pres)
-            self.co2_checkpoints.append({"name": str(pair.name), "temperature": str(temp) + " " + str(scan_result.readings[pair.temperature_channel_id].unit),"pressure": str(pres) + " " + str(scan_result.readings[pair.pressure_channel_id].unit), "state":state})
+            self.co2_checkpoints.append({"name": str(pair.name), "temperature": str(round(temp,2)) + " " + str(scan_result.readings[pair.temperature_channel_id].unit),"pressure": str(round(pres,2)) + " " + str(scan_result.readings[pair.pressure_channel_id].unit), "state":state})
         
         self.table_row = []
         for channel in scan_result.channels:

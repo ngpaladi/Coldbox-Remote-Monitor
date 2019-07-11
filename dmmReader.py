@@ -5,6 +5,7 @@ import sys
 import json
 import subprocess
 import argparse
+import webbrowser
 
 csv_file_name = str(sys.argv[1])
 time_interval = 5
@@ -37,6 +38,7 @@ fine_tune_time = (time_b-time_a) / (10 ** 9)
 start_time = now() + 5
 dmm.display("WAITING")
 p1 = subprocess.Popen("python -m http.server 8081")
+webbrowser.open("http://127.0.0.1:8800",1)
 while now() < start_time:
     time.sleep(0.05)
 
