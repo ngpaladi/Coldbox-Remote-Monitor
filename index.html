@@ -57,7 +57,7 @@
         <div class="row justify-content-center" style="max-height: 55vh;">
             <div class="col-md-8">
                 <div class="floating-box justify-content-center" style="height: 50vh;">
-                    <h2>TEMPERATURE</h2>
+                    <h2>TEMPERATURE (C)</h2>
                     <canvas class="graph-in-box" id="temperature-graph"
                         style="max-height: 37vh; max-width: 90%;"></canvas>
                 </div>
@@ -69,6 +69,9 @@
                         <tbody id="table-status">
                         </tbody>
                     </table>
+
+                    <h2>WARNINGS</h2>
+                    <p id="sync-warning" style="color:black">None</p>
                 </div>
             </div>
 
@@ -112,7 +115,8 @@
 
     </footer>
     <script type="text/javascript">
-        state_number = 0
+        state_number = 0;
+        desync = false;
 
         REFRESH_TIME = 5; //s
         INTERVAL = 0.5; //s
@@ -163,9 +167,6 @@
 
         function LoadState() {
             var state = JSON.parse($.getJSON({ 'url': "./CoolingSystemState.json", 'async': false }).responseText);
-            if (state["id"] != state_number){
-                alert("Potential Synchronization Issue!")
-            }
             if (state_number == 0) {
                 temp_graph.data.datasets = state["temperatures"];
             }
@@ -181,6 +182,17 @@
             }
 
             console.log("Loaded State " + String(state_number) + "\n");
+            if (desync && state["id"] == state_number){
+                document.getElementById("sync-warning").innerHTML = "Data Resynchronized";
+                document.getElementById("sync-warning").style = "color: orange";
+            }
+            if (state["id"] != state_number){
+                document.getElementById("sync-warning").innerHTML = "Potential Synchronization Issue: <br/> Points may not be drawn but still are recorded.";
+                document.getElementById("sync-warning").style = "color: red";
+                desync = true;
+                state_number = state["id"];
+            }
+            
         }
 
         document.getElementById("table-header").innerHTML = ToTableHeader(setup["header"]);

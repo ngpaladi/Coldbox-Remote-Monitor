@@ -90,8 +90,8 @@ class CoolingSystemState:
         
         self.table_row = []
         for channel in scan_result.channels:
-            self.table_row.append(str(scan_result.readings[channel.id].time))
-            self.table_row.append(str(scan_result.readings[channel.id].value))
+            self.table_row.append(str(round(scan_result.readings[channel.id].time,3)))
+            self.table_row.append(str(round(scan_result.readings[channel.id].value,3)))
     
     def WriteJSON(self,state_id):
         writable_dict = {}
