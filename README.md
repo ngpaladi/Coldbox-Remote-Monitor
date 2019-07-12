@@ -1,9 +1,11 @@
 # Coldbox Remote Monitoring System
+<img src="doc/Monitor_Webpage_Screenshot.png"/>
+
 A toolkit for reading in data from a Keithley 2701 multimeter in order to test the CO<sub>2</sub> cooling system for the CMS Forward Pixel Detector.
 
 ## CRM Tool
 
-The `crm` script can be used to start a data collection session. The script starts a webserver on port 8888 of the local machine with the monitoring interface and opens the default web browser. The user must specify the configuration file used (by default the program usesthe included `default.cfg` designed for the setup at Purdue).
+The `crm` script can be used to start a data collection session. The script starts a webserver on port 8888 of the local machine with the monitoring interface and opens the default web browser. The user must specify the configuration file used (by default the program uses the included `default.cfg` designed for the setup at Purdue University).
 
 The command should be run from inside the directory as follows:
 
