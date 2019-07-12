@@ -1,5 +1,5 @@
 # Coldbox Remote Monitoring System
-![Screenshot](/doc/Monitor_Webpage_Screenshot.png)
+![Screenshot](/img/Monitor_Webpage_Screenshot.png)
 
 A toolkit for reading in data from a Keithley 2701 multimeter in order to test the CO<sub>2</sub> cooling system for the CMS Forward Pixel Detector.
 
