@@ -10,7 +10,7 @@ CO2_TRIPLE_POINT_TEMP = -56.57 + 273.15  # k
 CO2_TRIPLE_POINT_PRESSURE = 5.11 * 1.01325  # bar
 CO2_CRITICAL_POINT_TEMPERATURE = 30.98 + 273.15  # k
 CO2_CRITICAL_POINT_PRESSURE = 72.79 * 1.01325 # bar
-COLOR_LIST = ['red','blue','hotpink','orange','yellow','darkgreen','cyan','navy','brown','gray','black','limegreen','navajowhite','steelblue','darkkhaki','lavender','magenta','purple','teal','greenyellow']
+COLOR_LIST = ['#CABC40','#88B509','#44A662','#084B66','#1A5751','#DD5C30','#DBC252','#143C4C','#344F3C','#5DAA79','#EF9038','red','blue','hotpink','orange','yellow','darkgreen','cyan','navy','brown','gray','black','limegreen','navajowhite','steelblue','darkkhaki','lavender','magenta','purple','teal','greenyellow']
 
 
 def CO2State(temp:float, pres:float) -> str:

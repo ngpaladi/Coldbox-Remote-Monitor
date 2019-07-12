@@ -37,8 +37,8 @@ fine_tune_time = (time_b-time_a) / (10 ** 9)
 
 start_time = now() + 5
 dmm.display("WAITING")
-p1 = subprocess.Popen("python -m http.server 8081")
-webbrowser.open("http://127.0.0.1:8800",1)
+p1 = subprocess.Popen("python -m http.server 8888")
+webbrowser.open("http://127.0.0.1:8888",1)
 while now() < start_time:
     time.sleep(0.05)
 
