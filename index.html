@@ -93,7 +93,7 @@
 
                 </div>
             </div>
-            
+
 
 
         </div>
@@ -124,8 +124,7 @@
 
         refresh_timer = 0.0;
         refresh_counter = -1;
-        table_data_str = "";
-        table_header_str = "";
+        table_data = [];
         var setup = JSON.parse($.getJSON({ 'url': "./CoolingSystemSetup.json", 'async': false }).responseText);
 
 
@@ -174,25 +173,32 @@
                 temp_graph.data.datasets = DatasetAppender(temp_graph.data.datasets, state["temperatures"]);
             }
             temp_graph.update();
-            document.getElementById("table-data").innerHTML += ToTableRow(state["row"]);
+
+            if (table_data.length >= 1440) { // Save last 2 hours
+                table_data.shift();
+            }
+            table_data.push(state["row"]);
+
+            document.getElementById("table-data").innerHTML += ToTableRows(table_data);
             document.getElementById("table-status").innerHTML = "";
+
             for (i = 0; i < state["checkpoints"].length; i++) {
-                document.getElementById("table-status").innerHTML += "<tr><td>" + state["checkpoints"][i]["name"] + "</td><td>"+ state["checkpoints"][i]["temperature"] + "</td><td>"+ state["checkpoints"][i]["pressure"] + "</td><td>"+ state["checkpoints"][i]["state"] + "</td></tr>"
+                document.getElementById("table-status").innerHTML += "<tr><td>" + state["checkpoints"][i]["name"] + "</td><td>" + state["checkpoints"][i]["temperature"] + "</td><td>" + state["checkpoints"][i]["pressure"] + "</td><td>" + state["checkpoints"][i]["state"] + "</td></tr>"
 
             }
 
             console.log("Loaded State " + String(state_number) + "\n");
-            if (desync && state["id"] == state_number){
+            if (desync && state["id"] == state_number) {
                 document.getElementById("sync-warning").innerHTML = "Data Resynchronized";
                 document.getElementById("sync-warning").style = "color: orange";
             }
-            if (state["id"] != state_number){
+            if (state["id"] != state_number) {
                 document.getElementById("sync-warning").innerHTML = "Potential Synchronization Issue: <br/> Points may not be drawn but still are recorded.";
                 document.getElementById("sync-warning").style = "color: red";
                 desync = true;
                 state_number = state["id"];
             }
-            
+
         }
 
         document.getElementById("table-header").innerHTML = ToTableHeader(setup["header"]);
