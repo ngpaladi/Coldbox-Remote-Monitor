@@ -25,10 +25,10 @@
         integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="web/css/style.css">
 
     <!-- Custom JS -->
-    <script src="js/main.js"></script>
+    <script src="web/js/main.js"></script>
 </head>
 
 <body>
@@ -90,10 +90,10 @@
                         </table>
 
                     </div>
-
+                    <button id="csv-download" class="button button-primary" href="#" download>Download</button>
                 </div>
             </div>
-            
+
 
 
         </div>
@@ -124,9 +124,8 @@
 
         refresh_timer = 0.0;
         refresh_counter = -1;
-        table_data_str = "";
-        table_header_str = "";
-        var setup = JSON.parse($.getJSON({ 'url': "./CoolingSystemSetup.json", 'async': false }).responseText);
+        table_data = [];
+        var setup = JSON.parse($.getJSON({ 'url': "./web/CoolingSystemSetup.json", 'async': false }).responseText);
 
 
         start_time = setup["start_time"];
@@ -166,7 +165,7 @@
 
 
         function LoadState() {
-            var state = JSON.parse($.getJSON({ 'url': "./CoolingSystemState.json", 'async': false }).responseText);
+            var state = JSON.parse($.getJSON({ 'url': "./web/CoolingSystemState.json", 'async': false }).responseText);
             if (state_number == 0) {
                 temp_graph.data.datasets = state["temperatures"];
             }
@@ -174,25 +173,32 @@
                 temp_graph.data.datasets = DatasetAppender(temp_graph.data.datasets, state["temperatures"]);
             }
             temp_graph.update();
-            document.getElementById("table-data").innerHTML += ToTableRow(state["row"]);
+
+            if (table_data.length >= 1440) { // Save last 2 hours
+                table_data.shift();
+            }
+            table_data.push(state["row"]);
+
+            document.getElementById("table-data").innerHTML = ToTableHTML(table_data);
             document.getElementById("table-status").innerHTML = "";
+
             for (i = 0; i < state["checkpoints"].length; i++) {
-                document.getElementById("table-status").innerHTML += "<tr><td>" + state["checkpoints"][i]["name"] + "</td><td>"+ state["checkpoints"][i]["temperature"] + "</td><td>"+ state["checkpoints"][i]["pressure"] + "</td><td>"+ state["checkpoints"][i]["state"] + "</td></tr>"
+                document.getElementById("table-status").innerHTML += "<tr><td>" + state["checkpoints"][i]["name"] + "</td><td>" + state["checkpoints"][i]["temperature"] + "</td><td>" + state["checkpoints"][i]["pressure"] + "</td><td>" + state["checkpoints"][i]["state"] + "</td></tr>"
 
             }
 
             console.log("Loaded State " + String(state_number) + "\n");
-            if (desync && state["id"] == state_number){
+            if (desync && state["id"] == state_number) {
                 document.getElementById("sync-warning").innerHTML = "Data Resynchronized";
                 document.getElementById("sync-warning").style = "color: orange";
             }
-            if (state["id"] != state_number){
+            if (state["id"] != state_number) {
                 document.getElementById("sync-warning").innerHTML = "Potential Synchronization Issue: <br/> Points may not be drawn but still are recorded.";
                 document.getElementById("sync-warning").style = "color: red";
                 desync = true;
                 state_number = state["id"];
             }
-            
+
         }
 
         document.getElementById("table-header").innerHTML = ToTableHeader(setup["header"]);

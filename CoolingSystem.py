@@ -3,6 +3,7 @@ import time
 import math
 import CoolProp.CoolProp as CP
 import json
+from pathlib import Path 
 
 PHASE_TOLERANCE = 0.01  # * 100%
 
@@ -44,15 +45,17 @@ class CoolingSystemConfig:
             self.channels.append(RM.Channel(ch,self.pressure_units))
 
 class CoolingSystemSetup:
-    def __init__(self, config, start_time):
+    def __init__(self, config, start_time, csv_name):
         self.channels = config.channels
         self.channel_pair_list = config.channel_pairs
         self.start_time = start_time
+        self.csv_name = csv_name
     def WriteJSON(self):
         writable_dict = {}
         writable_dict["start_time"] = self.start_time
         writable_dict["header"] = []
         writable_dict["checkpoint_names"] = []
+        writable_dict["csv"] = self.csv_name
 
         for pair in self.channel_pair_list:
             writable_dict["checkpoint_names"].append(str(pair.name))
@@ -60,7 +63,7 @@ class CoolingSystemSetup:
             writable_dict["header"].append("CH " + str(channel.id)+" Time (s)")
             writable_dict["header"].append("CH " + str(channel.id)+" Val ("+str(channel.unit)+")")
         
-        with open("CoolingSystemSetup.json","w+") as f:
+        with open(Path("web/CoolingSystemSetup.json"),"w+") as f:
             f.write(json.dumps(writable_dict))
 
 
@@ -99,7 +102,7 @@ class CoolingSystemState:
         writable_dict["temperatures"] = self.temperature_dataset
         writable_dict["checkpoints"] = self.co2_checkpoints
         writable_dict["row"] = self.table_row
-        with open("CoolingSystemState.json","w+") as f:
+        with open(Path("web/CoolingSystemState.json"),"w+") as f:
             f.write(json.dumps(writable_dict))
 
     
