@@ -1,5 +1,5 @@
 # Coldbox Remote Monitoring System
-![Screenshot](/img/Monitor_Webpage_Screenshot.png)
+![Screenshot](/web/img/Monitor_Webpage_Screenshot.png)
 
 A toolkit for reading in data from a Keithley 2701 multimeter in order to test the CO<sub>2</sub> cooling system for the CMS Forward Pixel Detector.
 
@@ -12,13 +12,14 @@ The command should be run from inside the directory as follows:
 ```cmd
 python crm.py -c <config.cfg> -o <output.csv>
 ```
+The csv output file will be saved in the `csv` subfolder and can be copied out upon completion of the test.
 
 ## CRM-Config Tool
 
-The `crm-config` script can be used to generate a configuration file for the CRM tool. After specifying the output configuration file name, the program will ask a series of questions which the user should respond to, and will result in a complete configuration file.
+The `crm-config` script can be used to generate a configuration file for the CRM tool. After requesting the output configuration file name, the program will ask a series of questions which the user should respond to, and will result in a complete configuration file.
 
 The command should be run from inside the project directory as follows:
 
 ```cmd
-python crm-config.py -o <output.cfg>
+python crm-config.py
 ```

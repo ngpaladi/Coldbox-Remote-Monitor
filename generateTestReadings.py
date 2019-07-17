@@ -31,7 +31,7 @@ def FakeMeasurements(t):
     return fake_measurements
 
 config = CS.CoolingSystemConfig("192.168.69.102", 1394, temp_channels,"C",pres_channels,"bar",pairs)
-setup = CS.CoolingSystemSetup(config,time.time_ns() / (10 ** 9)+10)
+setup = CS.CoolingSystemSetup(config,time.time_ns() / (10 ** 9)+10, "none")
 setup.WriteJSON()
 print(FakeMeasurements)
 p1 = subprocess.Popen("python -m http.server 8800", shell=True)

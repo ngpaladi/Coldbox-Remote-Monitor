@@ -1,4 +1,4 @@
-function ToTableRows(list) {
+function ToTableHTML(list) {
     html_string = "";
     for (j = 0; j < list.length; j++) {
         row = list[j];

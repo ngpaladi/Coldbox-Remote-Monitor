@@ -8,6 +8,7 @@ import subprocess
 import argparse
 import webbrowser
 import atexit
+from pathlib import Path 
 
 # Important Info
 __version__ = "0.0.5"
@@ -34,13 +35,24 @@ parser.add_argument('--version', action='version',
                     version='%(prog)s '+__version__)
 results = parser.parse_args()
 
+config_filename = Path(results.config_filename)
+csv_filename = Path("csv")
+csv_filename = csv_filename / Path(results.csv_filename).name
+
 print('---------------------\n\n      CRM '+__version__ +
       '      \n\n    Noah Paladino    \n        2019         \n\n---------------------\n')
 print('Settings:\n\nConfiguration: '+str(results.config_filename) +
-      '\nData Storage: '+str(results.csv_filename)+'\n\n---------------------')
+      '\nData Storage: '+str(csv_filename)+'\n\n---------------------')
 
+if csv_filename.exists() or not os.path.isdir(os.path.dirname(csv_filename.folder)):
+    print('WARNING: Output File Exists!') 
+    for x in range(5):
+        print('Overwriting in'+ str(5-x) + 'seconds', end='\r')
+        time.sleep(1)
+    print('Overwriting...')
 
-
+if not config_filename.is_file():
+    raise Exception("Invalid Configuration")
 
 
 
@@ -70,7 +82,7 @@ print('\nStart Time:\n'+str(start_time)+'\n'+str(datetime.utcfromtimestamp(int(s
 dmm.display("WAITING")
 
 # Start monitoring webpage 
-p1 = subprocess.Popen("python -m http.server 8888")
+p1 = subprocess.Popen("python -m http.server 8888", "web")
 webbrowser.open("http://127.0.0.1:8888",1)
 
 
