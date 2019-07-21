@@ -129,6 +129,7 @@
 
 
         start_time = setup["start_time"];
+        document.getElementById("csv-download").href=setup["csv"];
         Chart.defaults.line.backgroundColor = 'rgba(0, 0, 0, 0.0)';
         var temp_graph = new Chart(document.getElementById('temperature-graph'), {
             type: 'line',
@@ -168,11 +169,13 @@
             var state = JSON.parse($.getJSON({ 'url': "./web/CoolingSystemState.json", 'async': false }).responseText);
             if (state_number == 0) {
                 temp_graph.data.datasets = state["temperatures"];
+                temp_graph.update();
             }
-            else {
+            else if((state_number % 10) == 0){
                 temp_graph.data.datasets = DatasetAppender(temp_graph.data.datasets, state["temperatures"]);
+                temp_graph.update();
             }
-            temp_graph.update();
+            
 
             if (table_data.length >= 1440) { // Save last 2 hours
                 table_data.shift();

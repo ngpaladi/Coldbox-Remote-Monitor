@@ -13,6 +13,7 @@ CO2_CRITICAL_POINT_TEMPERATURE = 30.98 + 273.15  # k
 CO2_CRITICAL_POINT_PRESSURE = 72.79 * 1.01325 # bar
 COLOR_LIST = ['#CABC40','#88B509','#44A662','#084B66','#1A5751','#DD5C30','#DBC252','#143C4C','#344F3C','#5DAA79','#EF9038','red','blue','hotpink','orange','yellow','darkgreen','cyan','navy','brown','gray','black','limegreen','navajowhite','steelblue','darkkhaki','lavender','magenta','purple','teal','greenyellow']
 
+    
 
 def CO2State(temp:float, pres:float) -> str:
     temp_kelvin = temp + 273.15
@@ -26,16 +27,25 @@ class ChannelPair:
         self.name = str(name)
         self.temperature_channel_id = int(temperature_channel_id)
         self.pressure_channel_id = int(pressure_channel_id)
+    @classmethod
+    def FromDict(cls, s):
+        return ChannelPair(s["name"],s["temperature_channel_id"],s["pressure_channel_id"])
+    def ToDict(self):
+        return { "name": self.name, "temperature_channel_id": self.temperature_channel_id, "pressure_channel_id": self.pressure_channel_id}
 
 
 class CoolingSystemConfig:
-    def __init__(self, ip_address: str, port: int, temperature_channels = [], temperature_units = "", pressure_channels = [], pressure_units = "", channel_pairs=[]):
+    def __init__(self, ip_address: str, port: int, thermocouple_channels = [], thermistor_channels = [], temperature_units = "C", pressure_channels = [], pressure_units = "bar", pressure_supply_voltage=8.0, channel_pairs=[]):
         self.ip_address = str(ip_address)
         self.port = int(port)
-        self.temperature_channels = list(temperature_channels)
+        self.thermocouple_channels = list(thermocouple_channels)
+        self.thermistor_channels = list(thermistor_channels)
+        self.temperature_channels = list(self.thermocouple_channels)
+        self.temperature_channels.extend(list(self.thermistor_channels))
         self.temperature_units = str(temperature_units)
         self.pressure_channels = list(pressure_channels)
         self.pressure_units = str(pressure_units)
+        self.pressure_supply_voltage = float(pressure_supply_voltage)
         self.channel_pairs = list(channel_pairs)
 
         self.channels = []
@@ -43,6 +53,50 @@ class CoolingSystemConfig:
             self.channels.append(RM.Channel(ch,self.temperature_units))
         for ch in self.pressure_channels :
             self.channels.append(RM.Channel(ch,self.pressure_units))
+    @classmethod
+    def FromJSON(cls, in_file):
+        c = {}
+        if isinstance(in_file, (str, bytes, Path)):
+            with open(in_file, 'r') as f:
+                c = json.load(f)
+        else:
+            c = json.load(in_file)
+
+        ch_pairs = []
+        for index in range(len(c["channel_pairs"])):
+            ch_pairs.append(ChannelPair.FromDict(c["channel_pairs"][index]))
+
+        cfg = CoolingSystemConfig(c["ip_address"],c["port"], c["thermocouple_channels"], c["thermistor_channels"], c["temperature_units"],c["pressure_channels"],c["pressure_units"],c["pressure_supply_voltage"],ch_pairs)
+        return cfg
+
+    def WriteJSON(self, in_file):
+        c = {}
+        c["ip_address"] = self.ip_address
+        c["port"] = self.port
+        c["thermocouple_channels"] = self.thermocouple_channels
+        c["thermistor_channels"] = self.thermistor_channels
+        c["temperature_units"] = self.temperature_units
+        c["pressure_channels"] = self.pressure_channels
+        c["pressure_units"] = self.pressure_units
+        c["pressure_supply_voltage"] = self.pressure_supply_voltage
+        c["channel_pairs"]=[]
+        for p in self.channel_pairs:
+            c["channel_pairs"].append(p.ToDict())
+
+        if isinstance(in_file, (str, bytes, Path)):
+            with open(in_file, 'w+') as f:
+                f.write(json.dumps(c))
+        else:
+            in_file.write(json.dumps(c))
+
+    
+    def __str__(self):
+        pairs=""
+        for pair in self.channel_pairs:
+            pairs = pairs+"\n    Name: "+str(pair.name)+"\n        Temperature Channel: "+str(pair.temperature_channel_id)+"\n        Pressure Channel: "+str(pair.pressure_channel_id)+"\n"
+        return "IP: "+str(self.ip_address)+"\nPort: "+str(self.port)+"\n Thermocouple Channels: "+ str(self.thermocouple_channels) +"\n Thermistor Channels: "+ str(self.thermistor_channels)+"\nPressure Channels: "+ str(self.pressure_channels) + "\nPairs:"+ pairs+"\n"
+
+
 
 class CoolingSystemSetup:
     def __init__(self, config, start_time, csv_name):
@@ -65,6 +119,8 @@ class CoolingSystemSetup:
         
         with open(Path("web/CoolingSystemSetup.json"),"w+") as f:
             f.write(json.dumps(writable_dict))
+
+
 
 
 

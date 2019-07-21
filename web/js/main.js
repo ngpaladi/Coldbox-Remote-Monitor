@@ -20,7 +20,7 @@ function ToTableHeader(list) {
 }
 function DatasetAppender(existing, addition) {
     for (i = 0; i < addition.length; i++) {
-        if(existing[i]["data"].length >= 1440){ //only use last 2 hours
+        if(existing[i]["data"].length >= 144){ //only use last 2 hours
             existing[i]["data"].shift();
         }
         existing[i]["data"].push(addition[i].data[0]);

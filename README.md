@@ -16,10 +16,11 @@ The csv output file will be saved in the `csv` subfolder and can be copied out u
 
 ## CRM-Config Tool
 
-The `crm-config` script can be used to generate a configuration file for the CRM tool. After requesting the output configuration file name, the program will ask a series of questions which the user should respond to, and will result in a complete configuration file.
+The `crm-config` script can be used to generate and read configuration files for the CRM tool. After requesting the output configuration file name, the program will ask a series of questions which the user should respond to, and will result in a complete configuration file.
 
 The command should be run from inside the project directory as follows:
 
 ```cmd
-python crm-config.py
+python crm-config.py create <filename.cfg>
+python crm-config.py read <filename.cfg>
 ```
