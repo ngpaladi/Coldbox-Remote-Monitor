@@ -18,8 +18,15 @@ function ToTableHeader(list) {
     html_string += "</tr>";
     return html_string;
 }
-function DatasetAppender(existing, addition) {
+function DatasetAppender(existing, addition, counter) {
+    popper = true;
+    if(counter%10==1){
+        popper = false;
+    }
     for (i = 0; i < addition.length; i++) {
+        if (popper){
+            existing[i]["data"].pop();
+        }
         if(existing[i]["data"].length >= 144){ //only use last 2 hours
             existing[i]["data"].shift();
         }

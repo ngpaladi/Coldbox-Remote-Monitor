@@ -171,8 +171,8 @@
                 temp_graph.data.datasets = state["temperatures"];
                 temp_graph.update();
             }
-            else if((state_number % 10) == 0){
-                temp_graph.data.datasets = DatasetAppender(temp_graph.data.datasets, state["temperatures"]);
+            else {
+                temp_graph.data.datasets = DatasetAppender(temp_graph.data.datasets, state["temperatures"],state_number);
                 temp_graph.update();
             }
             

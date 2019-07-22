@@ -6,8 +6,11 @@ import subprocess
 import webbrowser
 import math
 
-temp_channels = [125,126,127,128,129,130,131,132,133]
-pres_channels = [110,111,112,113]
+tmst_channels = [121,122,123,124,125]
+tcpl_channels = [101,102,103]
+temp_channels = list(tcpl_channels)
+temp_channels.extend(tmst_channels)
+pres_channels = [111,112,113]
 pairs = [CS.ChannelPair("Point 1",125,110),CS.ChannelPair("Point 2",126,111),CS.ChannelPair("Point 3",127,112),CS.ChannelPair("Point 4",128,113)]
 
 
@@ -30,7 +33,7 @@ def FakeMeasurements(t):
 
     return fake_measurements
 
-config = CS.CoolingSystemConfig("192.168.69.102", 1394, temp_channels,"C",pres_channels,"bar",pairs)
+config = CS.CoolingSystemConfig("192.168.69.102", 1394, tcpl_channels, tmst_channels,"C",pres_channels,"bar",8.0,pairs)
 setup = CS.CoolingSystemSetup(config,time.time_ns() / (10 ** 9)+10, "none")
 setup.WriteJSON()
 print(FakeMeasurements)
