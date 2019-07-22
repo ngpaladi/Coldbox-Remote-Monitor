@@ -72,6 +72,14 @@ with open(config_filename) as config_file:
 if not isinstance(config, CS.CoolingSystemConfig):
     raise Exception("Invalid Configuration: Wrong file type")
 
+# Delete old json states
+if os.path.exists(Path("web/CoolingSystemState.json")):
+    os.remove(Path("web/CoolingSystemState.json"))
+    print("Old State Removed...")
+if os.path.exists(Path("web/CoolingSystemSetup.json")):
+    os.remove(Path("web/CoolingSystemSetup.json"))
+    print("Old Setup Removed...")
+
 # Connect to multimeter
 
 dmm = RM.RemoteMultimeter(config.ip_address, config.port)
@@ -90,15 +98,6 @@ baseline = dmm.scan(0)
 # Print out csv header
 with open(csv_filename, "w+") as csv_file:
     csv_file.write(dmm.makeCsvHeader())
-
-# Delete old json states
-if os.path.exists(Path("web/CoolingSystemState.json")):
-    os.remove(Path("web/CoolingSystemState.json"))
-    print("Old State Removed...")
-if os.path.exists(Path("web/CoolingSystemSetup.json")):
-    os.remove(Path("web/CoolingSystemSetup.json"))
-    print("Old Setup Removed...")
-
 
 # Figure out how long the timing process takes to fine tune the delay
 
