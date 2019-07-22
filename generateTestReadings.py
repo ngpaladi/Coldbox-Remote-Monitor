@@ -5,13 +5,14 @@ import random
 import subprocess
 import webbrowser
 import math
+import atexit
 
 tmst_channels = [121,122,123,124,125]
 tcpl_channels = [101,102,103]
 temp_channels = list(tcpl_channels)
 temp_channels.extend(tmst_channels)
 pres_channels = [111,112,113]
-pairs = [CS.ChannelPair("Point 1",125,110),CS.ChannelPair("Point 2",126,111),CS.ChannelPair("Point 3",127,112),CS.ChannelPair("Point 4",128,113)]
+pairs = [CS.ChannelPair("Point 1",101,111),CS.ChannelPair("Point 2",102,112),CS.ChannelPair("Point 3",103,113)]
 
 
 def FakeMeasurements(t):
@@ -38,10 +39,15 @@ setup = CS.CoolingSystemSetup(config,time.time_ns() / (10 ** 9)+10, "none")
 setup.WriteJSON()
 print(FakeMeasurements)
 p1 = subprocess.Popen("python -m http.server 8800", shell=True)
+def exit_handler():
+    p1.terminate()
+    p1.wait()
 
+atexit.register(exit_handler)
 webbrowser.open("http://127.0.0.1:8800",1)
 time.sleep(9.8)
 for i in range(0,129600):
+    print(setup.channels)
     state = CS.CoolingSystemState(setup,RM.ScanResult(setup.channels,FakeMeasurements(5*i),5*i))
     state.WriteJSON(i)
     time.sleep(5)

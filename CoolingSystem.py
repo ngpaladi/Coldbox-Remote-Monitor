@@ -143,6 +143,7 @@ class CoolingSystemState:
         self.co2_checkpoints = []
         for pair in setup.channel_pair_list:
             temp = scan_result.readings[pair.temperature_channel_id].value
+            print(pair.pressure_channel_id)
             pres = scan_result.readings[pair.pressure_channel_id].value
             state = CO2State(temp, pres)
             self.co2_checkpoints.append({"name": str(pair.name), "temperature": str(round(temp,2)) + " " + str(scan_result.readings[pair.temperature_channel_id].unit),"pressure": str(round(pres,2)) + " " + str(scan_result.readings[pair.pressure_channel_id].unit), "state":state})
