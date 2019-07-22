@@ -80,6 +80,7 @@ if os.path.exists(Path("web/CoolingSystemSetup.json")):
     os.remove(Path("web/CoolingSystemSetup.json"))
     print("Old Setup Removed...")
 
+
 # Connect to multimeter
 
 dmm = RM.RemoteMultimeter(config.ip_address, config.port)
@@ -120,6 +121,7 @@ dmm.display("WAITING")
 setup = CS.CoolingSystemSetup(
     config, start_time, "./csv/"+str(csv_filename.name))
 setup.WriteJSON()
+time.sleep(0.25*start_delay)
 
 # Start monitoring webpage
 p1 = subprocess.Popen("python -m http.server 8888")
