@@ -125,7 +125,7 @@
         refresh_timer = 0.0;
         refresh_counter = -1;
         table_data = [];
-        var setup = JSON.parse($.getJSON({ 'url': "./web/CoolingSystemSetup.json", 'async': false }).responseText);
+        var setup = JSON.parse($.getJSON({ 'url': "web/CoolingSystemSetup.json?v="+String(Date.now), 'async': false }).responseText);
 
 
         start_time = setup["start_time"];
@@ -166,7 +166,7 @@
 
 
         function LoadState() {
-            var state = JSON.parse($.getJSON({ 'url': "./web/CoolingSystemState.json", 'async': false }).responseText);
+            var state = JSON.parse($.getJSON({ 'url': "web/CoolingSystemState.json?v="+String(Date.now), 'async': false }).responseText);
             if (state_number == 0) {
                 temp_graph.data.datasets = state["temperatures"];
                 temp_graph.update();

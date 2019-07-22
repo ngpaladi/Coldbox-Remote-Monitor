@@ -119,6 +119,7 @@ class CoolingSystemSetup:
         
         with open(Path("web/CoolingSystemSetup.json"),"w+") as f:
             f.write(json.dumps(writable_dict))
+            print("Setup written")
 
 
 
