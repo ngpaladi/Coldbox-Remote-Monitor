@@ -36,9 +36,6 @@ def FakeMeasurements(t):
 
     return fake_measurements
 
-config = CS.CoolingSystemConfig("192.168.69.102", 1394, tcpl_channels, tmst_channels,"C",pres_channels,"bar",8.0,pairs)
-setup = CS.CoolingSystemSetup(config,time.time_ns() / (10 ** 9)+10, "none")
-setup.WriteJSON()
 # Delete old json states
 if os.path.exists(Path("web/CoolingSystemState.json")):
     os.remove(Path("web/CoolingSystemState.json"))
@@ -46,6 +43,10 @@ if os.path.exists(Path("web/CoolingSystemState.json")):
 if os.path.exists(Path("web/CoolingSystemSetup.json")):
     os.remove(Path("web/CoolingSystemSetup.json"))
     print("Old Setup Removed...")
+config = CS.CoolingSystemConfig("192.168.69.102", 1394, tcpl_channels, tmst_channels,"C",pres_channels,"bar",8.0,pairs)
+setup = CS.CoolingSystemSetup(config,time.time_ns() / (10 ** 9)+10, "none")
+setup.WriteJSON()
+
 print(FakeMeasurements)
 p1 = subprocess.Popen("python -m http.server 8800", shell=True)
 def exit_handler():
