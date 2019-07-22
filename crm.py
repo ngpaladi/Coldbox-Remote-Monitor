@@ -91,7 +91,16 @@ baseline = dmm.scan(0)
 with open(csv_filename, "w+") as csv_file:
     csv_file.write(dmm.makeCsvHeader())
 
-#Figure out how long the timing process takes to fine tune the delay
+# Delete old json states
+if os.path.exists(Path("web/CoolingSystemState.json")):
+    os.remove(Path("web/CoolingSystemState.json"))
+    print("Old State Removed...")
+if os.path.exists(Path("web/CoolingSystemSetup.json")):
+    os.remove(Path("web/CoolingSystemSetup.json"))
+    print("Old Setup Removed...")
+
+
+# Figure out how long the timing process takes to fine tune the delay
 
 time_a = time.time_ns()
 temp_time1 = time.time_ns()
