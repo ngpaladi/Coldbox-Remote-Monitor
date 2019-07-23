@@ -207,7 +207,7 @@ class RemoteMultimeter:
         # Save channel lists
 
         self.temperature_channels = list(self.thermocouple_channels)
-        self.temperature_channels.extend(self.thermocouple_channels)
+        self.temperature_channels.extend(self.thermistor_channels)
 
         # Create the total list of channels
         channels = list(self.temperature_channels)
