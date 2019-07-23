@@ -41,7 +41,7 @@ results = parser.parse_args()
 # Load in paths
 
 config_filename = Path(results.config_filename)
-csv_filename = Path("csv") / Path(results.csv_filename).name
+csv_filename = Path("csv/"+str(Path(results.csv_filename).name))
 
 # Print Welcome Info
 
