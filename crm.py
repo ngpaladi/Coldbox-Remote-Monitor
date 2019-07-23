@@ -38,6 +38,9 @@ parser.add_argument('--version', action='version',
                     version='%(prog)s '+__version__)
 results = parser.parse_args()
 
+if not os.path.exists("csv"):
+    os.makedirs("csv")
+
 # Load in paths
 
 config_filename = Path(results.config_filename)
@@ -47,7 +50,7 @@ csv_filename = Path("csv/"+str(Path(results.csv_filename).name))
 
 print('---------------------\n\n      CRM '+__version__ +
       '      \n\n    Noah Paladino    \n        2019         \n\n---------------------\n')
-print('Settings:\n\nConfiguration: '+str(results.config_filename) +
+print('Settings:\n\nConfiguration: '+str(Path(results.config_filename)) +
       '\nData Storage: '+str(csv_filename)+'\n\n---------------------')
 
 # Check if CSV and configuration exist
@@ -97,7 +100,7 @@ print(dmm)
 baseline = dmm.scan(0)
 
 # Print out csv header
-with open(str(csv_filename), "w+") as csv_file:
+with open(str(csv_filename), "w") as csv_file:
     csv_file.write(dmm.makeCsvHeader())
 
 # Figure out how long the timing process takes to fine tune the delay

@@ -206,11 +206,11 @@ class RemoteMultimeter:
             raise Exception("ERROR! No channels to set up")
         # Save channel lists
 
-        self.temperature_channels = self.thermocouple_channels
+        self.temperature_channels = list(self.thermocouple_channels)
         self.temperature_channels.extend(self.thermocouple_channels)
 
         # Create the total list of channels
-        channels = self.temperature_channels
+        channels = list(self.temperature_channels)
         channels.extend(self.voltage_channels)
         channels.extend(self.pressure_channels)
         self.channels = channels
