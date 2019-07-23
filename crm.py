@@ -97,7 +97,7 @@ print(dmm)
 baseline = dmm.scan(0)
 
 # Print out csv header
-with open(csv_filename, "w+") as csv_file:
+with open(str(csv_filename), "w+") as csv_file:
     csv_file.write(dmm.makeCsvHeader())
 
 # Figure out how long the timing process takes to fine tune the delay
@@ -149,7 +149,7 @@ while 1:
     t1 = time.time_ns()
     timestamp = now() - start_time
     result = dmm.scan(timestamp)
-    with open(csv_filename, "a") as csv_file:
+    with open(str(csv_filename), "a") as csv_file:
         csv_file.write(result.makeCsvRow())
     state = CS.CoolingSystemState(setup, result)
     state.WriteJSON(index)
