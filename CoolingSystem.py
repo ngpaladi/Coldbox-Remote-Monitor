@@ -4,6 +4,7 @@ import math
 import CoolProp.CoolProp as CP
 import json
 from pathlib import Path 
+import numpy as np
 
 PHASE_TOLERANCE = 0.01  # * 100%
 
@@ -13,14 +14,50 @@ CO2_CRITICAL_POINT_TEMPERATURE = 30.98 + 273.15  # k
 CO2_CRITICAL_POINT_PRESSURE = 72.79 * 1.01325 # bar
 COLOR_LIST = ['#CABC40','#88B509','#44A662','#084B66','#1A5751','#DD5C30','#DBC252','#143C4C','#344F3C','#5DAA79','#EF9038','red','blue','hotpink','orange','yellow','darkgreen','cyan','navy','brown','gray','black','limegreen','navajowhite','steelblue','darkkhaki','lavender','magenta','purple','teal','greenyellow']
 
+class PTFit:
+    def __init__(self):
+        self.A = float(3.4800623889616004e+003)/100 # t^0
+        self.B = float(9.0359026674679797e+001)/100 # t^1
+        self.C = float(8.9559206133742097e-001)/100 # t^2
+        self.D = float(5.7677062060042597e-003)/100 # t^3
+        self.E = float(3.2023333559056788e-005)/100 # t^4
+    def Evaluate(self, temperature:float):
+        t = temperature
+        a = self.A
+        b = self.B
+        c = self.C
+        d = self.D
+        e = self.E
+        return (e*(t**4)+d*(t**3)+c*(t**2)+b*(t)+a)
+    def EvaluateDerivative(self, temperature:float):
+        t = temperature
+        a = self.A
+        b = self.B
+        c = self.C
+        d = self.D
+        e = self.E
+        return (4*e*(t**3)+3*d*(t**2)+2*c*(t)+b)
+    def EvaluateDistance(self, t:float, temperature:float, pressure:float):
+        return np.sqrt((self.Evaluate(t)-pressure)**2 + (t-temperature)**2)
+    def MinimumDistance(self, temperature:float, pressure:float):
+        # I know this is really bad, but scipy isn't liking this function so bear with me
+        first = True
+        min = 0
+        for i in np.arange(temperature-15,temperature+15,0.01):
+            if first:
+                min = self.EvaluateDistance(i,temperature,pressure)
+                first = False
+            elif self.EvaluateDistance(i,temperature,pressure) <= min:
+                min = self.EvaluateDistance(i,temperature,pressure)
+        return min
+            
+
     
 
 def CO2State(temp:float, pres:float) -> str:
     temp_kelvin = temp + 273.15
     pres_pa = 100000 * pres
     return CP.PhaseSI( 'P', pres_pa, 'T',temp_kelvin,'CarbonDioxide')
-
-
 
 class ChannelPair:
     def __init__(self, name: str, temperature_channel_id: int, pressure_channel_id: int):
@@ -144,10 +181,16 @@ class CoolingSystemState:
         self.co2_checkpoints = []
         for pair in setup.channel_pair_list:
             temp = scan_result.readings[pair.temperature_channel_id].value
-            print(pair.pressure_channel_id)
             pres = scan_result.readings[pair.pressure_channel_id].value
             state = CO2State(temp, pres)
-            self.co2_checkpoints.append({"name": str(pair.name), "temperature": str(round(temp,2)) + " " + str(scan_result.readings[pair.temperature_channel_id].unit),"pressure": str(round(pres,2)) + " " + str(scan_result.readings[pair.pressure_channel_id].unit), "state":state})
+            fit = PTFit()
+            distance = fit.MinimumDistance(temp,pres)
+            sign = ""
+            if pres > fit.Evaluate(temp):
+                sign="+"
+            elif pres < fit.Evaluate(temp):
+                sign="-"
+            self.co2_checkpoints.append({"name": str(pair.name), "temperature": str(round(temp,2)) + " " + str(scan_result.readings[pair.temperature_channel_id].unit),"pressure": str(round(pres,2)) + " " + str(scan_result.readings[pair.pressure_channel_id].unit), "state":state, "distance":(sign+str(round(distance,3)))})
         
         self.table_row = []
         for channel in scan_result.channels:

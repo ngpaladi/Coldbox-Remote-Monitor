@@ -66,6 +66,15 @@
                 <div class="floating-box" style="height: 50vh;">
                     <h2>CO<sub>2</sub> STATUS</h2>
                     <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Temperature</th>
+                                <th>Pressure</th>
+                                <th>State</th>
+                                <th>Distance</th>
+                            </tr>
+                        </thead>
                         <tbody id="table-status">
                         </tbody>
                     </table>
@@ -125,8 +134,11 @@
         refresh_timer = 0.0;
         refresh_counter = -1;
         table_data = [];
-        var setup = JSON.parse($.getJSON({ 'url': "web/CoolingSystemSetup.json?v="+String(Date.now), 'async': false }).responseText);
 
+
+        var setup = JSON.parse($.getJSON({ 'url': "web/CoolingSystemSetup.json?v="+String(Date.now()), 'async': false }).responseText);
+
+        
 
         start_time = setup["start_time"];
         document.getElementById("csv-download").href=setup["csv"];
@@ -166,7 +178,7 @@
 
 
         function LoadState() {
-            var state = JSON.parse($.getJSON({ 'url': "web/CoolingSystemState.json?v="+String(Date.now), 'async': false }).responseText);
+            var state = JSON.parse($.getJSON({ 'url': "web/CoolingSystemState.json?v="+String(Date.now()), 'async': false }).responseText);
             if (state_number == 0) {
                 temp_graph.data.datasets = state["temperatures"];
                 temp_graph.update();
@@ -186,7 +198,7 @@
             document.getElementById("table-status").innerHTML = "";
 
             for (i = 0; i < state["checkpoints"].length; i++) {
-                document.getElementById("table-status").innerHTML += "<tr><td>" + state["checkpoints"][i]["name"] + "</td><td>" + state["checkpoints"][i]["temperature"] + "</td><td>" + state["checkpoints"][i]["pressure"] + "</td><td>" + state["checkpoints"][i]["state"] + "</td></tr>"
+                document.getElementById("table-status").innerHTML += "<tr><td>" + state["checkpoints"][i]["name"] + "</td><td>" + state["checkpoints"][i]["temperature"] + "</td><td>" + state["checkpoints"][i]["pressure"] + "</td><td>" + state["checkpoints"][i]["state"] + "</td><td>" + state["checkpoints"][i]["distance"] + "</td></tr>"
 
             }
 
