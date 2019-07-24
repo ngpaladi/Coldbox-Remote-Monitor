@@ -11,7 +11,7 @@ import atexit
 from pathlib import Path
 
 # Important Info
-__version__ = "0.0.5"
+__version__ = "0.1.0"
 
 
 # Settings

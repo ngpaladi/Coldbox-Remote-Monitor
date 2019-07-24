@@ -12,7 +12,7 @@ from pathlib import Path
 import json
 
 # Important Info
-__version__ = "0.0.5"
+__version__ = "1.0.0"
 
 
 # Functions
