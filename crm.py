@@ -91,7 +91,7 @@ dmm.setThermocoupleChannels(
     config.thermocouple_channels, config.temperature_units)
 dmm.setThermistorChannels(
     config.thermistor_channels, config.temperature_units)
-dmm.setPressureChannels(config.pressure_channels, config.pressure_units)
+dmm.setPressureChannels(config.pressure_channels, config.pressure_units, config.pressure_supply_voltage)
 dmm.setupChannels()
 print(dmm)
 

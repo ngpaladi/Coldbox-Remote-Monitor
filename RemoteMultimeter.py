@@ -2,10 +2,11 @@ import visa
 import time
 
 # Global Settings Declarations
-PRESSURE_SENSOR_SUPPLY_VOLTAGE = 8
 REFERENCE_PRESSURE = 1.013  # bar
 MAX_PRESSURE = 59  # bar
 MIN_PRESSURE = -1  # bar
+
+TIMEOUT = 5000 # ms
 
 # Unit Abbreviation Map
 UNIT_ABBREVATION_MAP = {"celcius": "C", "voltage": "V", "bar": "bar"}
@@ -22,10 +23,10 @@ def RemoveUnits(string: str) -> str:
     return string
 
 
-def VoltageToPressure(voltage_reading: float) -> float:
+def VoltageToPressure(voltage_reading: float, supply_voltage: float) -> float:
    
      # Will convert voltage to pressure
-    pressure = (abs(voltage_reading) - 0.1*PRESSURE_SENSOR_SUPPLY_VOLTAGE)*(MAX_PRESSURE-MIN_PRESSURE)/(0.8*PRESSURE_SENSOR_SUPPLY_VOLTAGE) + \
+    pressure = (abs(voltage_reading) - 0.1*supply_voltage)*(MAX_PRESSURE-MIN_PRESSURE)/(0.8*supply_voltage) + \
         MIN_PRESSURE+REFERENCE_PRESSURE  # Some linear function of voltage reading and supply voltage
     return pressure
 
@@ -50,11 +51,12 @@ class Measurement:
 class ScanResult:
     # Helper class for ease of reading returned values
 
-    def __init__(self, channels: list, raw_result: list, timestamp: float):
+    def __init__(self, channels: list, raw_result: list, timestamp: float, pressure_supply_voltage: float):
         self.raw_result = list(raw_result)
         self.channels = list(channels)
         self.initial_timestamp = float(timestamp)
         self.readings = {}
+        self.pressure_supply_voltage = float(pressure_supply_voltage)
 
         entry_index = 0
         channel_index = 0
@@ -67,7 +69,7 @@ class ScanResult:
                 last_time = float(RemoveUnits(entry))
                 if(channels[channel_index].unit in PRESSURE_UNITS):
                     self.readings[channels[channel_index].id] = Measurement(
-                        channels[channel_index], self.initial_timestamp+last_time, VoltageToPressure(last_value))
+                        channels[channel_index], self.initial_timestamp+last_time, VoltageToPressure(last_value, self.pressure_supply_voltage))
                 else:
                     self.readings[channels[channel_index].id] = Measurement(
                         channels[channel_index], self.initial_timestamp+last_time, last_value)
@@ -126,6 +128,8 @@ class RemoteMultimeter:
         # Setup display
         self.device.write("DISP:TEXT:STAT ON")
         self.device.write("DISP:TEXT:DATA 'READY'")
+
+        self.device.timeout = int(TIMEOUT)
 
         self.connected = True
 
@@ -203,11 +207,13 @@ class RemoteMultimeter:
         for id in channels:
             self.thermistor_channels.append(Channel(id, unit))
 
-    def setPressureChannels(self, channels: list, unit: str):
+    def setPressureChannels(self, channels: list, unit: str, voltage: float):
         if (unit.lower() in UNIT_ABBREVATION_MAP):
             unit = UNIT_ABBREVATION_MAP[unit]
         if (unit not in ["bar"]):
             raise Exception("ERROR! Invalid units")
+
+        self.pressure_supply_voltage = float(voltage)
 
         self.pressure_channels = []
         for id in channels:
@@ -252,7 +258,7 @@ class RemoteMultimeter:
 
     def scan(self, timestamp):
         self.last_scan_result = ScanResult(self.channels,
-                                           [x.strip() for x in self.device.query("READ?").split(',')], timestamp)
+                                           [x.strip() for x in self.device.query("READ?").split(',')], timestamp,self.pressure_supply_voltage)
         return self.last_scan_result
 
     def identify(self):
