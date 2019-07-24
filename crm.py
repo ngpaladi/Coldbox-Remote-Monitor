@@ -9,7 +9,6 @@ import argparse
 import webbrowser
 import atexit
 from pathlib import Path
-import pickle
 
 # Important Info
 __version__ = "0.0.5"

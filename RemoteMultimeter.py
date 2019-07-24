@@ -23,9 +23,9 @@ def RemoveUnits(string: str) -> str:
 
 
 def VoltageToPressure(voltage_reading: float) -> float:
-
-        # Will convert voltage to pressure
-    pressure = (voltage_reading - 0.1*PRESSURE_SENSOR_SUPPLY_VOLTAGE)*(MAX_PRESSURE-MIN_PRESSURE)/(0.8*PRESSURE_SENSOR_SUPPLY_VOLTAGE) + \
+   
+     # Will convert voltage to pressure
+    pressure = (abs(voltage_reading) - 0.1*PRESSURE_SENSOR_SUPPLY_VOLTAGE)*(MAX_PRESSURE-MIN_PRESSURE)/(0.8*PRESSURE_SENSOR_SUPPLY_VOLTAGE) + \
         MIN_PRESSURE+REFERENCE_PRESSURE  # Some linear function of voltage reading and supply voltage
     return pressure
 
@@ -136,9 +136,15 @@ class RemoteMultimeter:
         for channel in self.thermistor_channels:
             ch_list = ch_list+str(channel)+","
         ch_list = ch_list[:-1]
-        self.device.write("FUNC 'TEMP',(@"+str(ch_list)+")")
-        self.device.write("TEMP:TRAN THER,(@"+str(ch_list)+")")
-        self.device.write("TEMP:THER:TYPE 2200,(@"+str(ch_list)+")")
+
+        temp_ch_list = ""
+        for channel in self.temperature_channels:
+            temp_ch_list = temp_ch_list+str(channel)+","
+        temp_ch_list = temp_ch_list[:-1]
+
+        print(self.device.write("FUNC 'TEMP',(@"+str(temp_ch_list)+")"))
+        print(self.device.write("TEMP:TRAN THER,(@"+str(ch_list)+")"))
+        print(self.device.write("TEMP:THER:TYPE 2252,(@"+str(ch_list)+")"))
 
     def setupThermocoupleChannels(self):
         # Sets each channel in the list for a thermocouple
@@ -147,7 +153,13 @@ class RemoteMultimeter:
         for channel in self.thermocouple_channels:
             ch_list = ch_list+str(channel)+","
         ch_list = ch_list[:-1]
-        self.device.write("FUNC 'TEMP',(@"+str(ch_list)+")")
+
+        temp_ch_list = ""
+        for channel in self.temperature_channels:
+            temp_ch_list = temp_ch_list+str(channel)+","
+        temp_ch_list = temp_ch_list[:-1]
+
+        self.device.write("FUNC 'TEMP',(@"+str(temp_ch_list)+")")
         self.device.write("TEMP:TRAN TC,(@"+str(ch_list)+")")
         self.device.write("TEMP:TC:TYPE K,(@"+str(ch_list)+")")
         self.device.write("TEMP:TC:RJUN:RSEL INT,(@"+str(ch_list)+")")
