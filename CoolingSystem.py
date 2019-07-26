@@ -31,25 +31,13 @@ class PTFit:
         return (e*(t**4)+d*(t**3)+c*(t**2)+b*(t)+a)
     def EvaluateDerivative(self, temperature:float):
         t = temperature
-        a = self.A
         b = self.B
         c = self.C
         d = self.D
         e = self.E
         return (4*e*(t**3)+3*d*(t**2)+2*c*(t)+b)
-    def EvaluateDistance(self, t:float, temperature:float, pressure:float):
-        return np.sqrt((self.Evaluate(t)-pressure)**2 + (t-temperature)**2)
-    def MinimumDistance(self, temperature:float, pressure:float):
-        # I know this is really bad, but scipy isn't liking this function so bear with me
-        first = True
-        min = 0
-        for i in np.arange(temperature-15,temperature+15,0.01):
-            if first:
-                min = self.EvaluateDistance(i,temperature,pressure)
-                first = False
-            elif self.EvaluateDistance(i,temperature,pressure) <= min:
-                min = self.EvaluateDistance(i,temperature,pressure)
-        return min
+    def EvaluateDistance(self, temperature:float, pressure:float):
+        return np.sqrt(self.Evaluate(temperature)-pressure)
             
 
     
@@ -184,13 +172,13 @@ class CoolingSystemState:
             pres = scan_result.readings[pair.pressure_channel_id].value
             state = CO2State(temp, pres)
             fit = PTFit()
-            distance = fit.MinimumDistance(temp,pres)
+            distance = fit.EvaluateDistance(temp,pres)
             sign = ""
             if pres > fit.Evaluate(temp):
                 sign="+"
             elif pres < fit.Evaluate(temp):
                 sign="-"
-            self.co2_checkpoints.append({"name": str(pair.name), "temperature": str(round(temp,2)) + " " + str(scan_result.readings[pair.temperature_channel_id].unit),"pressure": str(round(pres,2)) + " " + str(scan_result.readings[pair.pressure_channel_id].unit), "state":state, "distance":(sign+str(round(distance,3)))})
+            self.co2_checkpoints.append({"name": str(pair.name), "temperature": str(round(temp,2)) + " " + str(scan_result.readings[pair.temperature_channel_id].unit),"pressure": str(round(pres,2)) + " " + str(scan_result.readings[pair.pressure_channel_id].unit), "state":state, "distance":(sign+str(round(distance,3))+ " " + str(scan_result.readings[pair.pressure_channel_id].unit))})
         
         self.table_row = []
         for channel in scan_result.channels:
