@@ -151,13 +151,13 @@ while 1:
     t1 = time.time_ns()
     timestamp = now() - start_time
     result = dmm.scan(timestamp)
-    print(result.raw_result)
+    result.raw_result
     with open(str(csv_filename), "a") as csv_file:
         csv_file.write(result.makeCsvRow())
     state = CS.CoolingSystemState(setup, result)
     state.WriteJSON(index)
+    print('Reading Number: ' + str(index), end='\r')
     index += 1
     t2 = time.time_ns()
     scan_time_elapsed = (t2-t1) / (10 ** 9)
-
     time.sleep(time_interval-scan_time_elapsed-fine_tune_time)
