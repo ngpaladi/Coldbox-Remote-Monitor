@@ -146,9 +146,9 @@ class RemoteMultimeter:
             temp_ch_list = temp_ch_list+str(channel)+","
         temp_ch_list = temp_ch_list[:-1]
 
-        print(self.device.write("FUNC 'TEMP',(@"+str(temp_ch_list)+")"))
-        print(self.device.write("TEMP:TRAN THER,(@"+str(ch_list)+")"))
-        print(self.device.write("TEMP:THER:TYPE 2252,(@"+str(ch_list)+")"))
+        self.device.write("FUNC 'TEMP',(@"+str(temp_ch_list)+")")
+        self.device.write("TEMP:TRAN THER,(@"+str(ch_list)+")")
+        self.device.write("TEMP:THER:TYPE 2252,(@"+str(ch_list)+")")
 
     def setupThermocoupleChannels(self):
         # Sets each channel in the list for a thermocouple
