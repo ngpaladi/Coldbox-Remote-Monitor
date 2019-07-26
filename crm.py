@@ -9,10 +9,9 @@ import argparse
 import webbrowser
 import atexit
 from pathlib import Path
-import pickle
 
 # Important Info
-__version__ = "0.0.5"
+__version__ = "0.1.0"
 
 
 # Settings
@@ -92,7 +91,7 @@ dmm.setThermocoupleChannels(
     config.thermocouple_channels, config.temperature_units)
 dmm.setThermistorChannels(
     config.thermistor_channels, config.temperature_units)
-dmm.setPressureChannels(config.pressure_channels, config.pressure_units)
+dmm.setPressureChannels(config.pressure_channels, config.pressure_units, config.pressure_supply_voltage)
 dmm.setupChannels()
 print(dmm)
 
@@ -152,6 +151,7 @@ while 1:
     t1 = time.time_ns()
     timestamp = now() - start_time
     result = dmm.scan(timestamp)
+    print(result.raw_result)
     with open(str(csv_filename), "a") as csv_file:
         csv_file.write(result.makeCsvRow())
     state = CS.CoolingSystemState(setup, result)
