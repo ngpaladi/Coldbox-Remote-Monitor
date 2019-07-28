@@ -171,6 +171,8 @@ class CoolingSystemState:
             temp = scan_result.readings[pair.temperature_channel_id].value
             pres = scan_result.readings[pair.pressure_channel_id].value
             state = CO2State(temp, pres)
+            if len(state) > 25:
+                state = "unknown"
             fit = PTFit()
             distance = fit.EvaluateDistance(temp,pres)
             sign = ""
