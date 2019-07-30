@@ -122,7 +122,11 @@ def create(args):
         while True:
             try:
                 thermist_channels = list(map(int,input(
-                    "Please enter the thermistor channels with spaces between (i.e. 101 102 103): ").strip().split()))
+                    "Please enter the thermistor channels with spaces between (i.e. 102 103 104): ").strip().split()))
+                for ch in thermist_channels:
+                    if ch < 102 or ch > 240 or (ch < 202 and ch > 140) or ch == 211 or ch == 111:
+                        print("Channel outside range or reserved (like 101, 111, 201, and 211)")
+                        continue
                 break
             except:
                 print("Invalid channel list. Please try again: ")
@@ -130,7 +134,11 @@ def create(args):
         while True:
             try:
                 thermcpl_channels = list(map(int,input(
-                    "Please enter the thermocouple channels with spaces between (i.e. 101 102 103): ").strip().split()))
+                    "Please enter the thermocouple channels with spaces between (i.e. 102 103 104): ").strip().split()))
+                for ch in thermcpl_channels:
+                    if ch < 102 or ch > 240 or (ch < 202 and ch > 140) or ch == 211 or ch == 111:
+                        print("Channel outside range or reserved (like 101, 111, 201, and 211)")
+                        continue
                 break
             except:
                 print("Invalid channel list. Please try again: ")
@@ -138,7 +146,11 @@ def create(args):
         while True:
             try:
                 pres_channels = list(map(int,input(
-                    "lease enter the pressure channels with spaces between (i.e. 101 102 103): ").strip().split()))
+                    "Please enter the pressure channels with spaces between (i.e. 102 103 104): ").strip().split()))
+                for ch in pres_channels:
+                    if ch < 102 or ch > 240 or (ch < 202 and ch > 140) or ch == 211 or ch == 111:
+                        print("Channel outside range or reserved (like 101, 111, 201, and 211)")
+                        continue
                 break
             except:
                 print("Invalid channel list. Please try again: ")

@@ -30,7 +30,7 @@ def FakeMeasurements(t):
         fake_measurements.append(str(float(i+len(pres_channels)))+"RDNG#")
 
     for i in range(len(pres_channels)):
-        fake_measurements.append(str(random.random()*6.4+.8))
+        fake_measurements.append(str(random.random()*4+.8))
         fake_measurements.append(str(0.01364*(i+len(temp_channels)))+"SECS")
         fake_measurements.append(str(float(i+len(temp_channels)))+"RDNG#")
 

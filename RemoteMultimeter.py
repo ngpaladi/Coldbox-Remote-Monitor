@@ -9,7 +9,7 @@ MIN_PRESSURE = -1  # bar
 TIMEOUT = 5000 # ms
 
 # Unit Abbreviation Map
-UNIT_ABBREVATION_MAP = {"celcius": "C", "voltage": "V", "bar": "bar"}
+UNIT_ABBREVATION_MAP = {"celsius": "C", "voltage": "V", "bar": "bar"}
 
 # Acceptable Units
 TEMPERATURE_UNITS = ["C"]
@@ -166,7 +166,24 @@ class RemoteMultimeter:
         self.device.write("FUNC 'TEMP',(@"+str(temp_ch_list)+")")
         self.device.write("TEMP:TRAN TC,(@"+str(ch_list)+")")
         self.device.write("TEMP:TC:TYPE K,(@"+str(ch_list)+")")
-        self.device.write("TEMP:TC:RJUN:RSEL INT,(@"+str(ch_list)+")")
+        self.device.write("TEMP:TC:RJUN:RSEL EXT,(@"+str(ch_list)+")")
+
+    def setupFRTDChannels(self):
+        # Sets each channel in the list for a thermocouple
+        self.device.write("UNIT:TEMP C")
+        ch_list = ""
+        for channel in self.frtd_channels:
+            ch_list = ch_list+str(channel)+","
+        ch_list = ch_list[:-1]
+
+        temp_ch_list = ""
+        for channel in self.temperature_channels:
+            temp_ch_list = temp_ch_list+str(channel)+","
+        temp_ch_list = temp_ch_list[:-1]
+
+        self.device.write("FUNC 'TEMP',(@"+str(temp_ch_list)+")")
+        self.device.write("TEMP:TRAN FRTD,(@"+str(ch_list)+")")
+        self.device.write("TEMP:FRTD:TYPE F100,(@"+str(ch_list)+")")
 
     def setupVoltageChannels(self):
         # Sets each channel in the list
@@ -207,6 +224,20 @@ class RemoteMultimeter:
         for id in channels:
             self.thermistor_channels.append(Channel(id, unit))
 
+    def setFRTDChannels(self, channels: list, unit: str):
+        if (unit.lower() in UNIT_ABBREVATION_MAP):
+            unit = UNIT_ABBREVATION_MAP[unit]
+        if (unit not in ["C"]):
+            raise Exception("ERROR! Invalid units")
+
+        self.frtd_channels = []
+        for pr in channels:
+            if not isinstance(pr, list) or not len(pr) == 2 or not isinstance(pr[0], int) or not isinstance(pr[1], int):
+                raise Exception("Not list of pairs of channels")
+            pr.sort()
+            self.frtd_channels.append(Channel(pr[0], unit))
+            
+
     def setPressureChannels(self, channels: list, unit: str, voltage: float):
         if (unit.lower() in UNIT_ABBREVATION_MAP):
             unit = UNIT_ABBREVATION_MAP[unit]
@@ -224,7 +255,9 @@ class RemoteMultimeter:
             raise Exception("ERROR! No channels to set up")
         # Save channel lists
 
-        self.temperature_channels = list(self.thermocouple_channels)
+
+        self.temperature_channels = list(self.frtd_channels)
+        self.temperature_channels.extend(self.thermocouple_channels)
         self.temperature_channels.extend(self.thermistor_channels)
 
         # Create the total list of channels
@@ -247,6 +280,7 @@ class RemoteMultimeter:
         self.device.write("TRIG:COUN 1")
 
         # List channels
+        self.setupFRTDChannels()
         self.setupThermocoupleChannels()
         self.setupThermistorChannels()
         self.setupVoltageChannels()
