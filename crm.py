@@ -87,7 +87,7 @@ if os.path.exists(Path("web/CoolingSystemSetup.json")):
 
 dmm = RM.RemoteMultimeter(config.ip_address, config.port)
 dmm.connect()
-dmm.setFRTDChannels([101,111],config.temperature_units)
+dmm.setFRTDChannels([[101,111]],config.temperature_units)
 dmm.setThermocoupleChannels(
     config.thermocouple_channels, config.temperature_units)
 dmm.setThermistorChannels(
