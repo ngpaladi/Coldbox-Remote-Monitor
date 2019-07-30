@@ -183,7 +183,11 @@ class RemoteMultimeter:
 
         self.device.write("FUNC 'TEMP',(@"+str(temp_ch_list)+")")
         self.device.write("TEMP:TRAN FRTD,(@"+str(ch_list)+")")
-        self.device.write("TEMP:FRTD:TYPE PT100,(@"+str(ch_list)+")")
+        self.device.write("TEMP:FRTD:TYPE USER,(@"+str(ch_list)+")")
+        self.device.write("TEMP:FRTD:RZER 1000,(@"+str(ch_list)+")")
+        self.device.write("TEMP:FRTD:ALPH 0.0385055,(@"+str(ch_list)+")")
+        self.device.write("TEMP:FRTD:BETA 0.10863,(@"+str(ch_list)+")")
+        self.device.write("TEMP:FRTD:DELT 1.49990,(@"+str(ch_list)+")")
 
     def setupVoltageChannels(self):
         # Sets each channel in the list
