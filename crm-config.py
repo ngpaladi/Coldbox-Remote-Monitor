@@ -124,8 +124,8 @@ def create(args):
                 thermist_channels = list(map(int,input(
                     "Please enter the thermistor channels with spaces between (i.e. 102 103 104): ").strip().split()))
                 for ch in thermist_channels:
-                    if ch < 102 or ch > 240 or (ch < 202 and ch > 140) or ch == 211 or ch == 111:
-                        print("Channel outside range or reserved (like 101, 111, 201, and 211)")
+                    if ch < 102 or ch > 240 or (ch < 202 and ch > 140) or ch == 121 or ch == 221:
+                        print("Channel outside range or reserved (like 101, 121, 201, and 221)")
                         continue
                 break
             except:
