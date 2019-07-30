@@ -125,7 +125,8 @@ class CoolingSystemConfig:
 
 class CoolingSystemSetup:
     def __init__(self, config, start_time, csv_name):
-        self.channels = config.channels
+        self.channels = [RM.Channel(101,'C')]
+        self.channels.extend(list(config.channels))
         self.channel_pair_list = config.channel_pairs
         self.start_time = start_time
         self.csv_name = csv_name
@@ -162,7 +163,7 @@ class CoolingSystemState:
             for pair in setup.channel_pair_list:
                 if (ch == pair.temperature_channel_id or ch == pair.pressure_channel_id or (not scan_result.readings[ch].unit in ['C','k','F'])):
                     paired_ch = True
-            if not paired_ch:
+            if not paired_ch and not ch == 101:
                 self.temperature_dataset.append({"label":"CH"+str(ch),"borderColor":COLOR_LIST[i % len(COLOR_LIST)], "data":[{"x":scan_result.readings[ch].time,"y":scan_result.readings[ch].value}]})
                 i += 1  
 
