@@ -168,23 +168,6 @@ class RemoteMultimeter:
         self.device.write("TEMP:TC:TYPE K,(@"+str(ch_list)+")")
         self.device.write("TEMP:TC:RJUN:RSEL EXT,(@"+str(ch_list)+")")
 
-    def setupFRTDChannels(self):
-        # Sets each channel in the list for a thermocouple
-        self.device.write("UNIT:TEMP C")
-        ch_list = ""
-        for channel in self.frtd_channels:
-            ch_list = ch_list+str(channel)+","
-        ch_list = ch_list[:-1]
-
-        temp_ch_list = ""
-        for channel in self.temperature_channels:
-            temp_ch_list = temp_ch_list+str(channel)+","
-        temp_ch_list = temp_ch_list[:-1]
-
-        self.device.write("FUNC 'TEMP',(@"+str(temp_ch_list)+")")
-        self.device.write("TEMP:TRAN THER,(@"+str(ch_list)+")")
-        self.device.write("TEMP:THER 2252,(@"+str(ch_list)+")")
-
     def setupVoltageChannels(self):
         # Sets each channel in the list
         ch_list=""
@@ -223,20 +206,7 @@ class RemoteMultimeter:
         self.thermistor_channels = []
         for id in channels:
             self.thermistor_channels.append(Channel(id, unit))
-
-    def setFRTDChannels(self, channels: list, unit: str):
-        if (unit.lower() in UNIT_ABBREVATION_MAP):
-            unit = UNIT_ABBREVATION_MAP[unit]
-        if (unit not in ["C"]):
-            raise Exception("ERROR! Invalid units")
-
-        self.frtd_channels = []
-        for pr in channels:
-            if not isinstance(pr, list) or not len(pr) == 2 or not isinstance(pr[0], int) or not isinstance(pr[1], int):
-                raise Exception("Not list of pairs of channels")
-            pr.sort()
-            self.frtd_channels.append(Channel(pr[0], unit))
-            
+           
 
     def setPressureChannels(self, channels: list, unit: str, voltage: float):
         if (unit.lower() in UNIT_ABBREVATION_MAP):
@@ -256,9 +226,8 @@ class RemoteMultimeter:
         # Save channel lists
 
 
-        self.temperature_channels = list(self.frtd_channels)
+        self.temperature_channels = list(self.thermistor_channels)
         self.temperature_channels.extend(self.thermocouple_channels)
-        self.temperature_channels.extend(self.thermistor_channels)
 
         # Create the total list of channels
         channels = list(self.temperature_channels)
@@ -280,9 +249,8 @@ class RemoteMultimeter:
         self.device.write("TRIG:COUN 1")
 
         # List channels
-        self.setupFRTDChannels()
-        self.setupThermocoupleChannels()
         self.setupThermistorChannels()
+        self.setupThermocoupleChannels()
         self.setupVoltageChannels()
         self.device.write("SAMP:COUN "+str(len(self.channels)))
         self.device.write("ROUT:SCAN (@"+self.list_of_channels_str+")")
