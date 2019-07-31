@@ -1,4 +1,4 @@
-import RemoteMultimeter as RM
+import py2700 as RM
 import CoolingSystem as CS
 import time
 from datetime import datetime
@@ -20,6 +20,7 @@ time_interval = 5  # s
 start_delay = 10  # s
 
 # Functions
+
 
 def now():
     return time.time_ns() / (10 ** 9)
@@ -84,24 +85,35 @@ if os.path.exists(Path("web/CoolingSystemSetup.json")):
 
 
 # Connect to multimeter
+dmm = RM.Multimeter('TCPIP::'+str(config.ip_address) +
+                    '::'+str(config.port)+'::SOCKET')
+# Set the default temperature units
+dmm.set_temperature_units(config.temperature_units)
 
-dmm = RM.RemoteMultimeter(config.ip_address, config.port)
-dmm.connect()
-dmm.setThermistorChannels(
-    [101].extend(config.thermistor_channels), config.temperature_units)
-dmm.setThermocoupleChannels(
-    config.thermocouple_channels, config.temperature_units)
+# Set the timeout in ms
+dmm.set_timeout(5000)
 
-dmm.setPressureChannels(config.pressure_channels, config.pressure_units, config.pressure_supply_voltage)
-dmm.setupChannels()
+dmm.define_channels([101], RM.MeasurementType.thermistor(2252))
+
+dmm.define_channels(
+    config.thermocouple_channels, RM.MeasurementType.thermocouple('K', 'EXT'))
+dmm.define_channels(config.thermistor_channels,
+                    RM.MeasurementType.thermistor(2252))
+dmm.define_channels(config.pressure_channels, RM.MeasurementType.dc_voltage())
+dmm.setup_scan()
 print(dmm)
 
 # Do test scan
 baseline = dmm.scan(0)
 
+# Turn Voltages to Pressures
+for ch in config.pressure_channels:
+    baseline.readings[ch].value = CS.VoltageToPressure(baseline.readings[ch].value,config.pressure_supply_voltage)
+    baseline.readings[ch].unit = "bar"
+
 # Print out csv header
 with open(str(csv_filename), "w") as csv_file:
-    csv_file.write(dmm.makeCsvHeader())
+    csv_file.write(baseline.make_csv_header())
 
 # Figure out how long the timing process takes to fine tune the delay
 
@@ -122,7 +134,7 @@ dmm.display("WAITING")
 # Load and write the setup
 
 setup = CS.CoolingSystemSetup(
-    config, start_time, "./csv/"+str(csv_filename.name))
+    config, start_time, str(csv_filename))
 setup.WriteJSON()
 time.sleep(0.25*start_delay)
 
@@ -152,9 +164,15 @@ while 1:
     t1 = time.time_ns()
     timestamp = now() - start_time
     result = dmm.scan(timestamp)
-    result.raw_result
+
+    # Turn Voltages to Pressures
+    for ch in config.pressure_channels:
+        result.readings[ch].value = CS.VoltageToPressure(result.readings[ch].value,config.pressure_supply_voltage)
+        result.readings[ch].unit = "bar"
+    
+    # Write CSV row
     with open(str(csv_filename), "a") as csv_file:
-        csv_file.write(result.makeCsvRow())
+        csv_file.write(result.make_csv_row())
     state = CS.CoolingSystemState(setup, result)
     state.WriteJSON(index)
     print('Reading Number: ' + str(index), end='\r')
