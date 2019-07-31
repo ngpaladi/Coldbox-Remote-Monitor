@@ -1,10 +1,22 @@
-import RemoteMultimeter as RM
+import py2700 as RM
 import time
 import math
 import CoolProp.CoolProp as CP
 import json
 from pathlib import Path 
 import numpy as np
+
+# Global Settings Declarations
+REFERENCE_PRESSURE = 1.013  # bar
+MAX_PRESSURE = 59  # bar
+MIN_PRESSURE = -1  # bar
+
+def VoltageToPressure(voltage_reading: float, supply_voltage: float) -> float:
+   
+     # Will convert voltage to pressure
+    pressure = (abs(voltage_reading) - 0.1*supply_voltage)*(MAX_PRESSURE-MIN_PRESSURE)/(0.8*supply_voltage) + \
+        MIN_PRESSURE+REFERENCE_PRESSURE  # Some linear function of voltage reading and supply voltage
+    return pressure
 
 PHASE_TOLERANCE = 0.01  # * 100%
 
@@ -73,11 +85,13 @@ class CoolingSystemConfig:
         self.pressure_supply_voltage = float(pressure_supply_voltage)
         self.channel_pairs = list(channel_pairs)
 
-        self.channels = []
-        for ch in self.temperature_channels :
-            self.channels.append(RM.Channel(ch,self.temperature_units))
+        self.channels = [RM.Channel(101,RM.MeasurementType.thermistor(2252),self.temperature_units)]
+        for ch in self.thermocouple_channels :
+            self.channels.append(RM.Channel(ch,RM.MeasurementType.thermocouple('K', 'EXT'),self.temperature_units))
+        for ch in self.thermistor_channels :
+            self.channels.append(RM.Channel(ch,RM.MeasurementType.thermistor(2252),self.temperature_units))
         for ch in self.pressure_channels :
-            self.channels.append(RM.Channel(ch,self.pressure_units))
+            self.channels.append(RM.Channel(ch,RM.MeasurementType.dc_voltage(), self.pressure_units))
     @classmethod
     def FromJSON(cls, in_file):
         c = {}
@@ -125,8 +139,7 @@ class CoolingSystemConfig:
 
 class CoolingSystemSetup:
     def __init__(self, config, start_time, csv_name):
-        self.channels = [RM.Channel(101,'C')]
-        self.channels.extend(list(config.channels))
+        self.channels = config.channels
         self.channel_pair_list = config.channel_pairs
         self.start_time = start_time
         self.csv_name = csv_name
