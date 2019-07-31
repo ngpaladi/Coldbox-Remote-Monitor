@@ -18,12 +18,18 @@ __version__ = "0.1.0"
 default_csv_filename = "Run_"+str(int(time.time()))+".csv"
 time_interval = 5  # s
 start_delay = 10  # s
+junction_thermistor_shift = 0.406 # degrees C
 
 # Functions
 
-
 def now():
     return time.time_ns() / (10 ** 9)
+    
+def guarantee_over_zero(f:float):
+    if f < float(0):
+        return float(0)
+    else:
+        return f
 
 
 # Parse Arguments
@@ -165,6 +171,12 @@ while 1:
     timestamp = now() - start_time
     result = dmm.scan(timestamp)
 
+    # Shift thermocouple readings after calibrating the thermistor that determines junction temperature
+    result.readings[101].value = result.readings[101].value + junction_thermistor_shift
+    for ch in config.thermocouple_channels:
+        result.readings[ch].value = result.readings[ch].value + junction_thermistor_shift
+
+
     # Turn Voltages to Pressures
     for ch in config.pressure_channels:
         result.readings[ch].value = CS.VoltageToPressure(result.readings[ch].value,config.pressure_supply_voltage)
@@ -173,10 +185,15 @@ while 1:
     # Write CSV row
     with open(str(csv_filename), "a") as csv_file:
         csv_file.write(result.make_csv_row())
+    
+    # Write state for browser to read
     state = CS.CoolingSystemState(setup, result)
     state.WriteJSON(index)
+
     print('Reading Number: ' + str(index), end='\r')
     index += 1
     t2 = time.time_ns()
     scan_time_elapsed = (t2-t1) / (10 ** 9)
-    time.sleep(time_interval-scan_time_elapsed-fine_tune_time)
+
+    #Sleep appropriate amount to ensure loop takes exactly 5 seconds
+    time.sleep(guarantee_over_zero(time_interval-scan_time_elapsed-fine_tune_time))
