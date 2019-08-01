@@ -44,6 +44,7 @@ parser.add_argument('--version', action='version',
                     version='%(prog)s '+__version__)
 results = parser.parse_args()
 
+# Make sure you run from the directory you cloned this into, otherwise web server will crash
 if not os.path.exists("csv"):
     os.makedirs("csv")
 
@@ -69,7 +70,7 @@ if csv_filename.exists():
     print('Overwriting...')
 
 if not config_filename.is_file():
-    config_filename = Path("config") / config_filename.name
+    config_filename = Path("cfg") / config_filename.name
     print("Couldn't find it, trying " + str(config_filename))
 
 if not config_filename.is_file():

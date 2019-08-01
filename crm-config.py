@@ -1,4 +1,4 @@
-import RemoteMultimeter as RM
+import py2700 as RM
 import CoolingSystem as CS
 import time
 from datetime import datetime
