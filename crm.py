@@ -11,14 +11,14 @@ import atexit
 from pathlib import Path
 
 # Important Info
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 # Settings
 default_csv_filename = "Run_"+str(int(time.time()))+".csv"
 time_interval = 5  # s
 start_delay = 10  # s
-junction_thermistor_shift = 0.406 # degrees C
+junction_thermistor_shift = 0.716 # degrees C
 
 # Functions
 

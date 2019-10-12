@@ -9,23 +9,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- CDN Imports (CSS & JS) -->
+    <!-- JQuery 3.3.1 -->
+    <script src="web/js/jquery.min.js"></script>
+    <!-- Popper 1.15.0 -->
+    <script src="web/js/popper.min.js"></script>
 
     <!-- Boostrap 4.3.1 -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"
-        integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
-        crossorigin="anonymous"></script>
-    <!-- JQuery 3.3.1 -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="web/css/bootstrap.min.css" />
+    <script src="web/js/bootstrap.bundle.min.js"></script>
+
     <!-- Chart.js 2.8.0 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"
-        integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css"
-        integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous" />
+    <script src="web/js/Chart.bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="web/css/Chart.min.css" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="web/css/style.css">
+    <link rel="stylesheet" type="text/css" href="web/css/style.css" />
 
     <!-- Custom JS -->
     <script src="web/js/main.js"></script>
@@ -136,12 +134,12 @@
         table_data = [];
 
 
-        var setup = JSON.parse($.getJSON({ 'url': "web/CoolingSystemSetup.json?v="+String(Date.now()), 'async': false }).responseText);
+        var setup = JSON.parse($.getJSON({ 'url': "web/CoolingSystemSetup.json?v=" + String(Date.now()), 'async': false }).responseText);
 
-        
+
 
         start_time = setup["start_time"];
-        document.getElementById("csv-download").href=setup["csv"];
+        document.getElementById("csv-download").href = setup["csv"];
         Chart.defaults.line.backgroundColor = 'rgba(0, 0, 0, 0.0)';
         var temp_graph = new Chart(document.getElementById('temperature-graph'), {
             type: 'line',
@@ -178,16 +176,16 @@
 
 
         function LoadState() {
-            var state = JSON.parse($.getJSON({ 'url': "web/CoolingSystemState.json?v="+String(Date.now()), 'async': false }).responseText);
+            var state = JSON.parse($.getJSON({ 'url': "web/CoolingSystemState.json?v=" + String(Date.now()), 'async': false }).responseText);
             if (state_number == 0) {
                 temp_graph.data.datasets = state["temperatures"];
                 temp_graph.update();
             }
             else {
-                temp_graph.data.datasets = DatasetAppender(temp_graph.data.datasets, state["temperatures"],state_number);
+                temp_graph.data.datasets = DatasetAppender(temp_graph.data.datasets, state["temperatures"], state_number);
                 temp_graph.update();
             }
-            
+
 
             if (table_data.length >= 1440) { // Save last 2 hours
                 table_data.shift();

@@ -1,4 +1,4 @@
-import RemoteMultimeter as RM
+import py2700 as RM
 import CoolingSystem as CS
 import time
 import random
@@ -57,7 +57,7 @@ atexit.register(exit_handler)
 webbrowser.open("http://127.0.0.1:8800",1)
 time.sleep(7.8)
 for i in range(0,129600):
-    state = CS.CoolingSystemState(setup,RM.ScanResult(setup.channels,FakeMeasurements(5*i),5*i,8.0))
+    state = CS.CoolingSystemState(setup,RM.ScanResult(setup.channels,FakeMeasurements(5*i),5*i))
     state.WriteJSON(i)
     time.sleep(5)
 p1.terminate()
